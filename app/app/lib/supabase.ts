@@ -1,18 +1,12 @@
 import { createClient, type User } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const DEFAULT_SUPABASE_URL = 'https://pjenyfvefvgbldgdegxs.supabase.co';
-const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_YD2rTCUgLpShbIrF1VYK3g_pEy4NR5F';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../config/public';
 
 const envUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const envAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-const supabaseUrl = envUrl ?? DEFAULT_SUPABASE_URL;
-const supabaseAnonKey = envAnonKey ?? DEFAULT_SUPABASE_ANON_KEY;
-
-if (!envUrl || !envAnonKey) {
-    console.warn('Missing Supabase env vars. Using bundled defaults for EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY.');
-}
+const supabaseUrl = envUrl ?? SUPABASE_URL;
+const supabaseAnonKey = envAnonKey ?? SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
