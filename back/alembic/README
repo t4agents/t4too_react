@@ -1,0 +1,5 @@
+alembic revision -m "create tenant_sequences table and next_invoice_number function"
+alembic revision --autogenerate -m "update base"      
+alembic upgrade head
+
+
