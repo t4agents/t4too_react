@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUserDisplayName, supabase, type SupabaseUser } from '../lib/supabase';
+import { runNewUserProvisioning } from '../services/auth';
 
 interface AuthContextValue {
     user: LocalUser | null;
@@ -16,8 +17,6 @@ interface LocalUser {
     displayName?: string;
 }
 
-const AUTH_USER_KEY = 't4auth:user';
-
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -25,15 +24,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const mapUser = (supabaseUser: SupabaseUser): LocalUser => ({
+        uid: supabaseUser.id,
+        email: supabaseUser.email ?? '',
+        displayName: getUserDisplayName(supabaseUser) ?? undefined,
+    });
+
     useEffect(() => {
         let isActive = true;
         const restoreSession = async () => {
             try {
-                const stored = await AsyncStorage.getItem(AUTH_USER_KEY);
+                const { data, error: sessionError } = await supabase.auth.getSession();
                 if (!isActive) return;
-                if (stored) {
-                    setUser(JSON.parse(stored) as LocalUser);
+                if (sessionError) {
+                    setError(sessionError.message);
                 }
+                const nextUser = data.session?.user ? mapUser(data.session.user) : null;
+                setUser(nextUser);
             } catch (err) {
                 if (isActive) {
                     setError(err instanceof Error ? err.message : 'Failed to restore session');
@@ -44,9 +51,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
             }
         };
+
         void restoreSession();
+
+        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (!isActive) return;
+            setUser(session?.user ? mapUser(session.user) : null);
+            setLoading(false);
+        });
+
         return () => {
             isActive = false;
+            authListener.subscription.unsubscribe();
         };
     }, []);
 
@@ -56,12 +72,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!trimmedEmail || !password.trim()) {
             throw new Error('Email and password are required.');
         }
-        const nextUser: LocalUser = {
-            uid: trimmedEmail.toLowerCase(),
+        const { error: signInError } = await supabase.auth.signInWithPassword({
             email: trimmedEmail,
-        };
-        setUser(nextUser);
-        await AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify(nextUser));
+            password,
+        });
+        if (signInError) {
+            throw new Error(signInError.message);
+        }
     };
 
     const signUp = async (email: string, password: string, displayName?: string) => {
@@ -70,18 +87,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!trimmedEmail || !password.trim()) {
             throw new Error('Email and password are required.');
         }
-        const nextUser: LocalUser = {
-            uid: trimmedEmail.toLowerCase(),
+        const display = displayName?.trim() || undefined;
+        const { data, error: signUpError } = await supabase.auth.signUp({
             email: trimmedEmail,
-            displayName: displayName?.trim() || undefined,
-        };
-        setUser(nextUser);
-        await AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify(nextUser));
+            password,
+            options: display ? { data: { full_name: display } } : undefined,
+        });
+        if (signUpError) {
+            throw new Error(signUpError.message);
+        }
+
+        if (data.session) {
+            try {
+                await runNewUserProvisioning({ displayName: display });
+            } catch (provisionError) {
+                console.warn('Failed to provision new user:', provisionError);
+            }
+        } else {
+            throw new Error('Check your email to confirm your account, then sign in.');
+        }
     };
 
     const signOut = async () => {
+        const { error: signOutError } = await supabase.auth.signOut();
+        if (signOutError) {
+            throw new Error(signOutError.message);
+        }
         setUser(null);
-        await AsyncStorage.removeItem(AUTH_USER_KEY);
     };
 
     const value = useMemo<AuthContextValue>(() => ({

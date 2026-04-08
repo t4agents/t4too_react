@@ -1,9 +1,26 @@
-import { API_BASE_URL } from '../constants/api';
+import { apiFetch } from './api';
+import { supabase } from '../lib/supabase';
 
-export async function runNewUserProvisioning(token: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/newuseronly/new_user`, {
+type NewUserProfile = {
+    displayName?: string | null;
+    photoURL?: string | null;
+};
+
+export async function runNewUserProvisioning(profile?: NewUserProfile): Promise<void> {
+    if (profile?.displayName || profile?.photoURL) {
+        const { error } = await supabase.auth.updateUser({
+            data: {
+                full_name: profile?.displayName ?? undefined,
+                avatar_url: profile?.photoURL ?? undefined,
+            },
+        });
+        if (error) {
+            throw error;
+        }
+    }
+
+    const response = await apiFetch('/newuseronly/new_user', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) {

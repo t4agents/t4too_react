@@ -1,10 +1,23 @@
 import { API_BASE_URL } from '../constants/api';
+import { getAccessToken } from '../lib/supabase';
 
 export async function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
+    let token: string | null = null;
+
+    try {
+        token = await getAccessToken();
+    } catch (error) {
+        console.warn('Failed to refresh Supabase access token:', error);
+    }
+
     const headers = new Headers(options.headers || {});
 
     if (!(options.body instanceof FormData) && !headers.has('Content-Type')) {
         headers.set('Content-Type', 'application/json');
+    }
+
+    if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
     }
 
     const prefix = path.startsWith('/') ? '' : '/';
