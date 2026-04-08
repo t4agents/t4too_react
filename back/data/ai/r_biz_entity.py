@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Dict, Any
 
-from app.core.firebase_auth import ZMe_DataClass, ZMe_DataClass, get_zme, get_zme
+from back.app.core.supabase_auth import ZMe_DataClass, ZMe_DataClass, get_zme, get_zme
 from app.db.db_async import get_session
 from app.schemas.sch_be import BizEntityCreate, BizEntityUpdate, BizEntityResponse
 from app.service.ser3_be import (

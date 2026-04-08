@@ -97,7 +97,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-from app.core.firebase_auth import core_verify_firebase_token
+from back.app.core.supabase_auth import core_verify_firebase_token
 from app.db.models.m_user import UserDB
 from app.db.models.m_user_client import UserClient
 from app.db.models.m_be import BizEntity 

@@ -12,7 +12,7 @@ from app.db.db_async import get_session
 from app.db.models import m_be, m_user, m_user_client, m_zme
 from app.schemas.sch_be import BizEntityBase
 
-from .firebase_auth import core_verify_firebase_token
+from .supabase_auth import core_verify_firebase_token
 
 security = HTTPBearer()
 
