@@ -10,10 +10,9 @@ from app.db.models import m_be, m_user, m_user_client, m_zme
 from app.db.seeds.seed_payroll_schedules import ensure_payroll_schedules_for_be
 
 async def new_user(decoded: dict, db: AsyncSession) -> dict[str, str | None]:
-    # firebase_uid is extracted via dependency # decoded contains the full Firebase token payload
-    firebase_uid = decoded.get("uid") or decoded.get("user_id") or decoded.get("sub")
+    supa_uid = decoded.get("uid") or decoded.get("user_id") or decoded.get("sub")
     email = decoded.get("email") or f"t4agents@gmail.com"  # default email if not provided
-    name  = decoded.get("name") or "T4 Agents"  # default name if not provided
+    name  = decoded.get("display_name") or decoded.get("name") or "T4 Agents"  # default name if not provided
     first_name = "T4"
     last_name = "Agents"
     phone = "332-203-4114"  # default phone, can be updated later
@@ -30,15 +29,15 @@ async def new_user(decoded: dict, db: AsyncSession) -> dict[str, str | None]:
     tax_no = "T4AGENTS123"  # default tax number, can be
    
     
-    if not firebase_uid:  raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    if not supa_uid:  raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
     # check existing
-    result = await db.execute(select(m_zme.ZMeDB).where(m_zme.ZMeDB.firebase_uid == firebase_uid))
+    result = await db.execute(select(m_zme.ZMeDB).where(m_zme.ZMeDB.id == supa_uid))
     existing = result.scalar_one_or_none()
 
     if existing:return {"message": "already registered",}
 
-    ten_be_user_id = uuid4()
+    ten_be_user_id = supa_uid
     tenant_id = str(ten_be_user_id)
     await db.execute(
         text("select set_config('t4rls.tid', :tenant_id, true)"),
@@ -46,7 +45,6 @@ async def new_user(decoded: dict, db: AsyncSession) -> dict[str, str | None]:
     )
     
     user = m_user.UserDB(
-        firebase_uid=firebase_uid,
 
         id     =ten_be_user_id,
         biz_id =ten_be_user_id,
@@ -87,6 +85,7 @@ async def new_user(decoded: dict, db: AsyncSession) -> dict[str, str | None]:
 
 
     user_client = m_user_client.UserClient(
+        id = ten_be_user_id,
         user_id=ten_be_user_id,
         biz_id=ten_be_user_id,
         ten_id=ten_be_user_id,
@@ -99,7 +98,6 @@ async def new_user(decoded: dict, db: AsyncSession) -> dict[str, str | None]:
         biz_id  =   ten_be_user_id,  # required by your design
         owner_id=   ten_be_user_id,  # required by your design       
         
-        firebase_uid=firebase_uid,
     )
 
 
