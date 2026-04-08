@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import uuid4, UUID
 
 from fastapi import HTTPException, status
 
@@ -30,14 +30,18 @@ async def new_user(decoded: dict, db: AsyncSession) -> dict[str, str | None]:
    
     
     if not supa_uid:  raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    try:
+        supa_uuid = UUID(str(supa_uid))
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user id")
 
     # check existing
-    result = await db.execute(select(m_zme.ZMeDB).where(m_zme.ZMeDB.id == supa_uid))
+    result = await db.execute(select(m_zme.ZMeDB).where(m_zme.ZMeDB.id == supa_uuid))
     existing = result.scalar_one_or_none()
 
     if existing:return {"message": "already registered",}
 
-    ten_be_user_id = supa_uid
+    ten_be_user_id = supa_uuid
     tenant_id = str(ten_be_user_id)
     await db.execute(
         text("select set_config('t4rls.tid', :tenant_id, true)"),

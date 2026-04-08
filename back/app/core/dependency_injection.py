@@ -1,4 +1,6 @@
 from typing import Sequence
+import logging
+from uuid import UUID
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -15,6 +17,7 @@ from app.schemas.sch_be import BizEntityBase
 from .supabase_auth import core_verify_firebase_token
 
 security = HTTPBearer()
+logger = logging.getLogger("app.auth")
 
 @dataclass(frozen=True)
 class ZMeDataClass:
@@ -31,14 +34,22 @@ class ZBeList_DataClass(ZMeDataClass):
 # wrap the above function with FastAPI dependency to extract user context from database
 async def get_zme(credentials: HTTPAuthorizationCredentials = Depends(security),session: AsyncSession = Depends(get_session),) -> ZMeDataClass:
     decoded = core_verify_firebase_token(credentials.credentials)
-    fb_uid = decoded.get("uid") or decoded.get("user_id") or decoded.get("sub")
-    if not fb_uid:raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    sub = decoded.get("sub")
+    if not sub:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    try:
+        user_id = UUID(str(sub))
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user id")
+    logger.info("Auth ok: sub=%s", sub)
 
-    stmt = select(m_zme.ZMeDB).where(m_zme.ZMeDB.firebase_uid == str(fb_uid))
+    stmt = select(m_zme.ZMeDB).where(m_zme.ZMeDB.id == user_id)
     result = await session.execute(stmt)
     me = result.scalar_one_or_none()
 
-    if not me:raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    if not me:
+        logger.info("Auth user missing in m_zme: sub=%s", sub)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found in m_zme")
     if not me.id:raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User has no tenant")
     if not me.biz_id:raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User has no active business")
 

@@ -1,4 +1,5 @@
 import time
+import logging
 import requests
 from jose import jwt, jwk
 from jose.exceptions import JWTError
@@ -9,6 +10,7 @@ from app.config import get_settings_singleton
 
 settings = get_settings_singleton()
 security = HTTPBearer()
+logger = logging.getLogger("app.auth")
 
 _JWKS_CACHE = {"expires_at": 0.0, "keys": []}
 
@@ -73,15 +75,19 @@ def core_verify_firebase_token(id_token: str):
             raise HTTPException(status_code=401, detail="Invalid authentication token")
 
         public_key = jwk.construct(jwk_key).to_pem()
-        return jwt.decode(
+        decoded = jwt.decode(
             id_token,
             public_key,
             algorithms=[alg],
             audience=_audience(),
             issuer=_issuer(),
         )
+        uid = decoded.get("uid") or decoded.get("user_id") or decoded.get("sub")
+        logger.info("JWT verified: uid=%s aud=%s iss=%s", uid, decoded.get("aud"), decoded.get("iss"))
+        return decoded
 
-    except JWTError:
+    except JWTError as e:
+        logger.info("JWT verify failed: %s", str(e))
         raise HTTPException(status_code=401, detail="Invalid authentication token")
     except HTTPException:
         raise
