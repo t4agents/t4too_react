@@ -27,6 +27,12 @@ class _Settings(BaseSettings):
     STRIPE_PRICE_PRO_YEAR: str = "price_1TBOaiRwLzeE6kyCgHUak49W"
     STRIPE_PRICE_ENTERPRISE_MONTH: str = "price_1TBOb9RwLzeE6kyCcAgDncr1"
     STRIPE_PRICE_ENTERPRISE_YEAR: str = "price_1TBObXRwLzeE6kyCSWexfBjm"
+
+    # Supabase Auth
+    SUPABASE_URL: str = ""
+    SUPABASE_ANON_KEY: str = ""
+    SUPABASE_JWT_ISSUER: str = ""
+    SUPABASE_JWT_AUD: str = ""
     
 @lru_cache()
 def get_settings_singleton()-> _Settings:
