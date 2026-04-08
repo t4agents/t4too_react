@@ -57,7 +57,8 @@
       "expo-sqlite",
       "expo-camera",
       "expo-location",
-      "expo-media-library"
+      "expo-media-library",
+      "expo-font"
     ]
   }
 }
