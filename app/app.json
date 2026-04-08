@@ -2,7 +2,7 @@
   "expo": {
     "name": "T4Agents",
     "slug": "slug-t4agents",
-    "version": "6.54.331",
+    "version": "6.55.0408",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "stormchaser",
