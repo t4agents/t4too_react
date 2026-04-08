@@ -304,8 +304,8 @@ const MarketingHome = () => {
                 >
                     <div className="md:flex-1 md:mr-10">
                         <h1 className="font-pt-serif text-5xl font-bold mb-7" style={{ color: '#1c1c19' }}>
-                            <span className="block">Team of One.</span>
-                            <span className="block mt-6 text-right">AI Payroll Agents.</span>
+                            <span className="block">Team of One</span>
+                            <span className="block mt-6 text-right">AI Payroll Agents</span>
                         </h1>
                         <p className="font-pt-serif font-normal mb-7" style={{ color: '#564335' }}>
                             Run payroll in minutes, keep taxes on track, and give your team clear pay stubs without the late nights.
