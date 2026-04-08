@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, ScrollView, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { Alert, Modal, ScrollView, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,6 +16,7 @@ import { entryAPI, PayrollEntryResponse } from '../services/entry';
 import { employeeAPI, Employee } from '../services/employees';
 import { formatDateRange, formatDateShort, formatMoney, toNumberSafe } from '../utils/format';
 import { RootTabParamList } from '../types/navigation';
+import { showToast } from '../utils/toast';
 
 const formatStatusLabel = (status: string, meta: Record<string, unknown> = {}) => {
     const metaBits = [
@@ -87,6 +88,7 @@ export const HomeScreen: React.FC = () => {
     const [askStatusLines, setAskStatusLines] = useState<string[]>([]);
     const [askAnswer, setAskAnswer] = useState<string | null>(null);
     const [askMeta, setAskMeta] = useState<{ confidence?: number; model?: string; route?: string; top_k?: number } | null>(null);
+    const [assistantOpen, setAssistantOpen] = useState(false);
 
     const loadDashboardData = useCallback(async () => {
         setDataLoading(true);
@@ -111,8 +113,9 @@ export const HomeScreen: React.FC = () => {
         void loadDashboardData();
     }, [loadDashboardData, activeClient?.id]);
 
-    const handleAsk = useCallback(async () => {
-        const trimmed = query.trim();
+    const handleAsk = useCallback(async (overrideQuery?: string) => {
+        const candidate = typeof overrideQuery === 'string' ? overrideQuery : query;
+        const trimmed = candidate.trim();
         if (!trimmed) {
             Alert.alert('Ask Payroll AI', 'Type a question to get started.');
             return;
@@ -195,6 +198,55 @@ export const HomeScreen: React.FC = () => {
 
     const greetingName = user?.displayName ? ` ${user.displayName}` : '';
 
+    const assistantBriefing = useMemo(() => ([
+        { label: 'Employees', value: employeeCount ? String(employeeCount) : '—' },
+        { label: 'Draft payroll', value: entrySummary ? `${entrySummary.count} entries` : 'None' },
+        { label: 'Last run', value: latestHistory ? formatDateShort(latestHistory.pay_day ?? latestHistory.period_end) : 'No history' },
+        { label: 'Missing tax IDs', value: missingSinCount ? String(missingSinCount) : '0' },
+    ]), [employeeCount, entrySummary, latestHistory, missingSinCount]);
+
+    const assistantActions = useMemo(() => ([
+        {
+            title: 'Ask Payroll AI',
+            subtitle: 'Get a quick status summary',
+            icon: 'sparkles-outline' as const,
+            onPress: () => {
+                setAssistantOpen(false);
+                const question = 'Summarize our current payroll status and next steps.';
+                setQuery(question);
+                void handleAsk(question);
+            },
+        },
+        {
+            title: 'Review Payroll Runs',
+            subtitle: 'Open draft and history',
+            icon: 'cash-outline' as const,
+            onPress: () => {
+                setAssistantOpen(false);
+                navigation.navigate('Payroll');
+            },
+        },
+        {
+            title: 'Onboard Employees',
+            subtitle: 'Scan and verify documents',
+            icon: 'scan-outline' as const,
+            onPress: () => {
+                setAssistantOpen(false);
+                navigation.navigate('Onboarding');
+            },
+        },
+        {
+            title: 'Refresh Dashboard',
+            subtitle: 'Sync latest payroll data',
+            icon: 'refresh-outline' as const,
+            onPress: () => {
+                void loadDashboardData();
+                setAssistantOpen(false);
+                showToast('Refreshing', 'Fetching the latest payroll data.');
+            },
+        },
+    ]), [handleAsk, loadDashboardData, navigation]);
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -204,9 +256,12 @@ export const HomeScreen: React.FC = () => {
                         <Text style={styles.title}>{activeClient?.name ?? 'Your Payroll'}</Text>
                         <Text style={styles.subtitle}>All your people, one AI-first hub.</Text>
                     </View>
-                    <View style={styles.avatar}>
+                    <TouchableOpacity
+                        style={styles.avatar}
+                        onPress={() => setAssistantOpen(true)}
+                    >
                         <Ionicons name="sparkles" size={20} color="#fff" />
-                    </View>
+                    </TouchableOpacity>
                 </View>
 
                 <LinearGradient
@@ -229,7 +284,7 @@ export const HomeScreen: React.FC = () => {
                             placeholderTextColor={currentTheme.colors.textSecondary}
                             style={styles.searchInput}
                             returnKeyType="search"
-                            onSubmitEditing={handleAsk}
+                            onSubmitEditing={() => handleAsk()}
                         />
                         <View style={styles.searchActions}>
                             <Ionicons name="mic-outline" size={18} color={currentTheme.colors.textSecondary} />
@@ -292,7 +347,7 @@ export const HomeScreen: React.FC = () => {
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
                         <Text style={styles.sectionTitle}>Quick Actions</Text>
-                        <TouchableOpacity onPress={() => {}}>
+                        <TouchableOpacity onPress={() => showToast('Coming soon', 'Quick action customization is on the way.')}>
                             <Text style={styles.sectionLink}>Customize</Text>
                         </TouchableOpacity>
                     </View>
@@ -378,6 +433,53 @@ export const HomeScreen: React.FC = () => {
                     </View>
                 </View>
             </ScrollView>
+
+            <Modal visible={assistantOpen} transparent animationType="fade">
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalCard}>
+                        <View style={styles.modalHeader}>
+                            <View style={styles.modalIcon}>
+                                <Ionicons name="sparkles" size={18} color="#fff" />
+                            </View>
+                            <View style={styles.modalHeaderText}>
+                                <Text style={styles.modalTitle}>AI Assistant</Text>
+                                <Text style={styles.modalSubtitle}>Quick briefing and shortcuts</Text>
+                            </View>
+                            <TouchableOpacity onPress={() => setAssistantOpen(false)}>
+                                <Ionicons name="close" size={20} color={currentTheme.colors.textSecondary} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.modalBriefing}>
+                            {assistantBriefing.map((item) => (
+                                <View key={item.label} style={styles.modalBriefingItem}>
+                                    <Text style={styles.modalBriefingLabel}>{item.label}</Text>
+                                    <Text style={styles.modalBriefingValue}>{item.value}</Text>
+                                </View>
+                            ))}
+                        </View>
+
+                        <View style={styles.modalActions}>
+                            {assistantActions.map((action) => (
+                                <TouchableOpacity
+                                    key={action.title}
+                                    style={styles.modalActionCard}
+                                    onPress={action.onPress}
+                                >
+                                    <View style={styles.modalActionIcon}>
+                                        <Ionicons name={action.icon} size={18} color={colors.main} />
+                                    </View>
+                                    <View style={styles.modalActionText}>
+                                        <Text style={styles.modalActionTitle}>{action.title}</Text>
+                                        <Text style={styles.modalActionSubtitle}>{action.subtitle}</Text>
+                                    </View>
+                                    <Ionicons name="chevron-forward" size={16} color={currentTheme.colors.textSecondary} />
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 };

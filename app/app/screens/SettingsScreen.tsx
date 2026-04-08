@@ -53,8 +53,8 @@ export const SettingsScreen: React.FC = () => {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Payroll</Text>
 
-                    <View style={styles.settingItem}>
-                        <View style={styles.settingInfo}>
+                    <View style={styles.settingItemColumn}>
+                        <View style={styles.settingInfoFull}>
                             <Text style={styles.settingTitle}>Pay Frequency</Text>
                             <Text style={styles.settingDescription}>
                                 Default schedule for new payroll runs
