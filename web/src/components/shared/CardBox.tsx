@@ -1,13 +1,16 @@
 import React from "react";
 import { Card } from "../ui/card";
 
-interface MyAppProps {
+type CardBoxProps = React.ComponentProps<"div"> & {
   children: React.ReactNode;
-  className?: string;
-}
-const CardBox: React.FC<MyAppProps> = ({ children, className }) => {
+};
+
+const CardBox: React.FC<CardBoxProps> = ({ children, className, ...props }) => {
   return (
-    <Card className={`card no-inset no-ring ${className} shadow-none border border-ld rounded-lg w-full`}>
+    <Card
+      className={`card no-inset no-ring ${className} shadow-none border border-ld rounded-lg w-full`}
+      {...props}
+    >
       {children}
     </Card>
   );

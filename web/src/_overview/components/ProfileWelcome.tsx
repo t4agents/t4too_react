@@ -21,7 +21,7 @@ const ProfileWelcome = () => {
     // }, [firstName]);
 
     return (
-        <div className="relative flex items-center justify-between bg-lightsecondary rounded-lg p-6">
+        <div className="relative flex items-center justify-between rounded-lg p-6 bg-[radial-gradient(circle_at_top_left,rgba(242,133,0,0.18),transparent_55%),radial-gradient(circle_at_top_right,rgba(242,133,0,0.16),transparent_48%)]">
             <div className="flex items-center gap-3">
                 <div>
                     <img src={avatarUrl} alt="user-img" width={50} height={50} className="rounded-full h-[50px] w-[50px] object-cover" />

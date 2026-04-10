@@ -129,6 +129,13 @@ const SidebarContent: MenuItem[] = [
                 url: '/app/support/kb',
                 isPro: false,
             },
+            {
+                name: 'Integration',
+                id: uniqueId(),
+                icon: 'solar:link-circle-linear',
+                url: '/app/support/integration',
+                isPro: false,
+            },
         ],
     },
 ];

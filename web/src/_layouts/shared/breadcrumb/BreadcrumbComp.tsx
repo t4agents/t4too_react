@@ -20,7 +20,7 @@ interface BreadCrumbType {
 const BreadcrumbComp = ({ title, items = [], leftContent, rightContent }: BreadCrumbType) => {
   return (
     <CardBox
-      className="mb-6 py-4 bg-lightsecondary overflow-hidden rounded-md border-none shadow-none! dark:shadow-none! relative"
+      className="mb-6 py-4 overflow-hidden rounded-md border-none shadow-none! dark:shadow-none! relative bg-[radial-gradient(circle_at_top_left,rgba(242,133,0,0.18),transparent_55%),radial-gradient(circle_at_top_right,rgba(242,133,0,0.16),transparent_48%)]"
     >
       <div className="grid grid-cols-12 gap-6 items-center">
         <div className="col-span-8 flex items-center gap-4">
