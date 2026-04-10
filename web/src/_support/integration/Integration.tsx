@@ -144,13 +144,13 @@ const Integration = () => {
     const [invoiceNumbers, setInvoiceNumbers] = useState<string[]>([]);
     const [rangeOpen, setRangeOpen] = useState(false);
 
-    const handleRefreshInvoices = async () => {
+    const handleRefreshInvoices = () => {
         const skipValue = refreshSkip.trim();
         const topValue = refreshTop.trim();
 
         if (!skipValue || !topValue) {
             notifyToast({
-                message: 'Please provide both skip and top values.',
+                message: 'Please enter both a skip and top value to continue.',
                 variant: 'error',
             });
             return;
@@ -158,30 +158,45 @@ const Integration = () => {
 
         setRefreshLoading(true);
         setRefreshStatus(null);
-        try {
-            const params = new URLSearchParams({
-                skip: skipValue,
-                top: topValue,
+
+        const params = new URLSearchParams({
+            skip: skipValue,
+            top: topValue,
+        });
+        const noticeMessage = 'Refresh started. Updates can take up to 10 minutes to appear.';
+        setRefreshStatus(noticeMessage);
+        notifyToast({
+            message: noticeMessage,
+            variant: 'success',
+        });
+        setRefreshLoading(false);
+
+        void fetch(`https://growthzone.fastapicloud.dev/refresh_open?${params.toString()}`)
+            .then((response) => {
+                if (response.status === 409) {
+                    const duplicateMessage =
+                        'Looks like a refresh is already running. No action is needed from you.';
+                    setRefreshStatus(duplicateMessage);
+                    notifyToast({
+                        message: duplicateMessage,
+                        variant: 'success',
+                    });
+                    return;
+                }
+                if (!response.ok) {
+                    throw new Error(`Refresh failed with status ${response.status}`);
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                const gentleMessage =
+                    'We could not start the refresh right now. If you already submitted one, it may still be processing.';
+                setRefreshStatus(gentleMessage);
+                notifyToast({
+                    message: gentleMessage,
+                    variant: 'error',
+                });
             });
-            const response = await fetch(`https://growthzone.fastapicloud.dev/refresh_open?${params.toString()}`);
-            if (!response.ok) {
-                throw new Error(`Refresh failed with status ${response.status}`);
-            }
-            setRefreshStatus('Refresh request submitted. Invoices will update shortly.');
-            notifyToast({
-                message: 'Refresh request submitted successfully.',
-                variant: 'success',
-            });
-        } catch (error) {
-            console.error(error);
-            setRefreshStatus('Unable to refresh invoices. Please try again.');
-            notifyToast({
-                message: 'Unable to refresh invoices. Please try again.',
-                variant: 'error',
-            });
-        } finally {
-            setRefreshLoading(false);
-        }
     };
 
     const handleMyInvoices = async () => {
@@ -191,7 +206,7 @@ const Integration = () => {
 
         if (!startValue || !endValue || !createdByValue) {
             notifyToast({
-                message: 'Please provide start, end, and created_by values.',
+                message: 'Please enter a start, end, and created by value to continue.',
                 variant: 'error',
             });
             return;
@@ -207,6 +222,16 @@ const Integration = () => {
                 created_by: createdByValue,
             });
             const response = await fetch(`https://growthzone.fastapicloud.dev/refresh_open_range?${params.toString()}`);
+            if (response.status === 409) {
+                const duplicateMessage =
+                    'That range was already requested. We will keep using the existing results.';
+                setRangeStatus(duplicateMessage);
+                notifyToast({
+                    message: duplicateMessage,
+                    variant: 'success',
+                });
+                return;
+            }
             if (!response.ok) {
                 throw new Error(`Fetch failed with status ${response.status}`);
             }
@@ -220,9 +245,11 @@ const Integration = () => {
             );
         } catch (error) {
             console.error(error);
-            setRangeStatus('Unable to load invoices. Please confirm the inputs and try again.');
+            setRangeStatus(
+                'We could not retrieve invoices right now. If this is a duplicate request, it may already be in progress.'
+            );
             notifyToast({
-                message: 'Unable to load invoices. Please try again.',
+                message: 'We could not retrieve invoices right now. Please try again in a moment.',
                 variant: 'error',
             });
         } finally {
