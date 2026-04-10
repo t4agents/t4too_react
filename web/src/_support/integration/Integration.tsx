@@ -221,7 +221,9 @@ const Integration = () => {
                 end: endValue,
                 created_by: createdByValue,
             });
-            const response = await fetch(`https://growthzone.fastapicloud.dev/refresh_open_range?${params.toString()}`);
+            const response = await fetch(
+                `https://growthzone.fastapicloud.dev/refresh_open_range?${params.toString()}`
+            );
             if (response.status === 409) {
                 const duplicateMessage =
                     'That range was already requested. We will keep using the existing results.';
@@ -233,7 +235,22 @@ const Integration = () => {
                 return;
             }
             if (!response.ok) {
-                throw new Error(`Fetch failed with status ${response.status}`);
+                const contentType = response.headers.get('content-type') ?? '';
+                let errorDetail = '';
+                if (contentType.includes('application/json')) {
+                    const jsonBody = await response.json().catch(() => null);
+                    errorDetail =
+                        typeof jsonBody?.detail === 'string'
+                            ? jsonBody.detail
+                            : JSON.stringify(jsonBody ?? {});
+                } else {
+                    errorDetail = await response.text().catch(() => '');
+                }
+                const normalizedDetail = errorDetail.trim();
+                const message = normalizedDetail
+                    ? `Fetch failed with status ${response.status}: ${normalizedDetail}`
+                    : `Fetch failed with status ${response.status}`;
+                throw new Error(message);
             }
             const data = await response.json();
             const numbers = Array.isArray(data?.invoice_numbers)
@@ -245,11 +262,13 @@ const Integration = () => {
             );
         } catch (error) {
             console.error(error);
-            setRangeStatus(
-                'We could not retrieve invoices right now. If this is a duplicate request, it may already be in progress.'
-            );
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : 'Fetch failed with an unknown error.';
+            setRangeStatus(message);
             notifyToast({
-                message: 'We could not retrieve invoices right now. Please try again in a moment.',
+                message,
                 variant: 'error',
             });
         } finally {
