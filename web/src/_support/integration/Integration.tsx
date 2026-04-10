@@ -322,7 +322,7 @@ const Integration = () => {
 
                             {isGrowthZone && (
                                 <div className="mt-5 flex items-center justify-end gap-2">
-                                    <Button
+                                    {/* <Button
                                         size="sm"
                                         className="whitespace-nowrap"
                                         onClick={(event) => {
@@ -331,7 +331,7 @@ const Integration = () => {
                                         }}
                                     >
                                         Refresh Invoices
-                                    </Button>
+                                    </Button> */}
                                     <Button
                                         size="sm"
                                         variant="outline"
