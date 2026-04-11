@@ -4,6 +4,6 @@
     "workspaces": [
         "t4agents",
         "ainvoaice",
-        "packages/*"
+        "shared/*"
     ]
 }
