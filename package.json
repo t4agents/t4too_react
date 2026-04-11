@@ -1,0 +1,9 @@
+{
+    "name": "t4",
+    "private": true,
+    "workspaces": [
+        "t4agents",
+        "ainvoaice",
+        "packages/*"
+    ]
+}
