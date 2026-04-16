@@ -10,7 +10,7 @@ type UserProfileState = {
     setFBName: (fbName: string) => void;
     setFBClientName: (fbClientName: string) => void;
     setFBAvatar: (avatarUrl: string | null) => void;
-    hydrateFromApi: () => Promise<void>;
+    // hydrateFromApi: () => Promise<void>;
 };
 
 export const useUserProfileStore = create<UserProfileState>((set, get) => ({
@@ -24,23 +24,23 @@ export const useUserProfileStore = create<UserProfileState>((set, get) => ({
     setFBClientName: (fbClient: string) => set({ fbClientName: fbClient || '' }),
     setFBAvatar: (avatarUrl) => set({ fbAvatar: avatarUrl }),
 
-    hydrateFromApi: async () => {
-        const { hydrating, hydrated } = get();
-        if (hydrating || hydrated) return;
+    // hydrateFromApi: async () => {
+    //     const { hydrating, hydrated } = get();
+    //     if (hydrating || hydrated) return;
 
-        set({ hydrating: true });
-        try {
-            const user = await meOrgAPI.getMe();
-            set({
-                fbName: user.name || '',
-                fbAvatar: user.avatar || null,
-                hydrated: true,
-            });
-        } catch {
-            set({ hydrated: true });
-        } finally {
-            set({ hydrating: false });
-        }
-    },
+    //     set({ hydrating: true });
+    //     try {
+    //         const user = await meOrgAPI.getMe();
+    //         set({
+    //             fbName: user.name || '',
+    //             fbAvatar: user.avatar || null,
+    //             hydrated: true,
+    //         });
+    //     } catch {
+    //         set({ hydrated: true });
+    //     } finally {
+    //         set({ hydrating: false });
+    //     }
+    // },
 }));
 

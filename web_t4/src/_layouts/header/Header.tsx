@@ -5,7 +5,6 @@ import FullLogo from '../shared/logo/FullLogo';
 import Profile from './Profile';
 import SidebarLayout from '../sidebar/Sidebar';
 import { useTheme } from 'src/components/provider/theme-provider';
-import ClientSwitcher from './ClientSwitcher';
 
 import { Sheet, SheetContent, SheetTitle } from 'src/components/ui/sheet';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
@@ -84,7 +83,6 @@ const Header = () => {
 
           <div className="xl:!block !hidden md:!hidden">
             <div className="flex gap-0 items-center">
-              <ClientSwitcher />
 
               {/* Theme Toggle */}
               {theme === 'light' ? (
