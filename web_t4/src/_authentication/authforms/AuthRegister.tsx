@@ -10,6 +10,7 @@ import { supabase } from "src/lib/supabase";
 import { notifyToast } from "src/lib/toast";
 import AuthLoadingOverlay from "./AuthLoadingOverlay";
 import { runNewUserProvisioning } from "./auth-flow";
+import { apiGetJson } from "src/lib/apihttp";
 
 const STATUS_MESSAGES = [
     "Setting up your account...",
@@ -80,28 +81,30 @@ const AuthRegister = () => {
                 password,
                 options: {
                     data: {
-                        full_name: trimmedName,
-                        avatar_url: `https://raw.githubusercontent.com/t4agents/t4agents/refs/heads/main/t4favicon.png`,
+                        sbu_name: trimmedName,
+                        sbu_avatar: `https://raw.githubusercontent.com/t4agents/t4agents/refs/heads/main/t4favicon.png`,
+                        sbu_client_name: trimmedName,
+                        sbu_client_id: `client-${Date.now()}`,
+                        sbu_user_type: "T4USER",
                     },
                 },
             });
 
-            if (error) {
-                throw error;
-            }
+            if (error) {throw error;}
 
-            if (!data.session) {
-                notifyToast({
-                    message: "Check your email to confirm your account, then sign in.",
-                    variant: "info",
-                });
-                return;
-            }
+            // if (!data.session) {
+            //     notifyToast({
+            //         message: "Check your email to confirm your account, then sign in.",
+            //         variant: "info",
+            //     });
+            //     return;
+            // }
 
-            await runNewUserProvisioning({
-                displayName: trimmedName,
-                photoURL: `https://raw.githubusercontent.com/t4agents/t4agents/refs/heads/main/t4favicon.png`,
-            });
+            await runNewUserProvisioning();
+            // await runNewUserProvisioning({
+            //     displayName: trimmedName,
+            //     photoURL: `https://raw.githubusercontent.com/t4agents/t4agents/refs/heads/main/t4favicon.png`,
+            // });
             navigate("/app");
 
         } catch (error: any) {

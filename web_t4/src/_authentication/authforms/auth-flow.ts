@@ -3,6 +3,7 @@ import type { NavigateFunction } from "react-router-dom";
 import { clientsAPI } from "src/_settings/clients/clients-api";
 import type { InterfaceBE } from "src/_settings/clients/clients-api";
 import { config } from "src/config";
+import { apiFetch } from "src/lib/apihttp";
 import { getAccessToken, supabase } from "src/lib/supabase";
 
 type ActiveBE = { active_zbid: string; name: string } | null;
@@ -46,35 +47,43 @@ type NewUserProfile = {
     photoURL?: string | null;
 };
 
-export async function runNewUserProvisioning(profile?: NewUserProfile): Promise<void> {
-    if (profile?.displayName || profile?.photoURL) {
-        const { error } = await supabase.auth.updateUser({
-            data: {
-                full_name: profile?.displayName ?? undefined,
-                avatar_url: profile?.photoURL ?? undefined,
-            },
-        });
-        if (error) {
-            throw error;
-        }
-    }
+export async function runNewUserProvisioning(): Promise<void> {
+    // const response = await apiFetch('/r1_new_user_provision', { method: 'POST' });
+    const response = await apiFetch('/r1_new_user_provision_with_seed', { method: 'POST' });
 
-    const token = await getAccessToken();
-    if (!token) {
-        throw new Error("Missing Supabase session token.");
-    }
-    const res = await fetch(`${config.api.baseUrl}/newuseronly/new_user`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(errText);
-    }
-
-    localStorage.setItem("access_token", "place holder only for register");
+    if (!response.ok) throw new Error(await response.text());
 }
+
+    
+// export async function runNewUserProvisioning(profile?: NewUserProfile): Promise<void> {
+//     if (profile?.displayName || profile?.photoURL) {
+//         const { error } = await supabase.auth.updateUser({
+//             data: {
+//                 full_name: profile?.displayName ?? undefined,
+//                 avatar_url: profile?.photoURL ?? undefined,
+//             },
+//         });
+//         if (error) {
+//             throw error;
+//         }
+//     }
+
+//     const token = await getAccessToken();
+//     if (!token) {
+//         throw new Error("Missing Supabase session token.");
+//     }
+//     const res = await fetch(`${config.api.baseUrl}/newuseronly/new_user`, {
+//         method: "POST",
+//         headers: { Authorization: `Bearer ${token}` },
+//     });
+
+//     if (!res.ok) {
+//         const errText = await res.text();
+//         throw new Error(errText);
+//     }
+
+//     localStorage.setItem("access_token", "place holder only for register");
+// }
 
 export async function registerNewUserIfNeeded(
     isNewUser: boolean,
@@ -82,6 +91,6 @@ export async function registerNewUserIfNeeded(
 ): Promise<void> {
     if (!isNewUser) return;
 
-    await runNewUserProvisioning(profile);
+    await runNewUserProvisioning();
 }
 

@@ -23,7 +23,7 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
         headers.set('Content-Type', 'application/json');
     }
 
-    if (token) {headers.set('Authorization', `Bearer ${token}`);}
+    if (token) { headers.set('Authorization', `Bearer ${token}`); }
 
     const prefix = path.startsWith('/') ? '' : '/';
     const res = await fetch(`${API_BASE_URL}${prefix}${path}`, {
@@ -46,4 +46,11 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
     return res;
 }
 
-export default apiFetch;
+export async function apiGetJson<T>(path: string): Promise<T> {
+    const response = await apiFetch(path);
+    if (!response.ok) {
+        const details = await response.text().catch(() => '');
+        throw new Error(`-- Request failed: ${response.status} ${response.statusText}${details ? ` - ${details}` : ''}`);
+    }
+    return response.json();
+}

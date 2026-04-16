@@ -77,9 +77,9 @@ const AuthLogin = () => {
                 email: email.trim(),
                 password,
             });
-            if (error) {
-                throw error;
-            }
+            if (error) {throw error;}
+
+            
             await completeAuthLogin(navigate, setClients, setActiveBE);
         } catch (error: any) {
             console.error(error);

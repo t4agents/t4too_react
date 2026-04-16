@@ -100,8 +100,11 @@ const MarketingHome = () => {
                 password: signupPassword,
                 options: {
                     data: {
-                        full_name: trimmedCompany,
-                        avatar_url: 'https://raw.githubusercontent.com/t4agents/t4agents/refs/heads/main/t4favicon.png',
+                        sbu_name: trimmedCompany,
+                        sbu_avatar: `https://raw.githubusercontent.com/t4agents/t4agents/refs/heads/main/t4favicon.png`,
+                        sbu_client_name: trimmedCompany,
+                        sbu_client_id: `client-${Date.now()}`,
+                        sbu_user_type: "T4USER",
                     },
                 },
             });
@@ -112,10 +115,7 @@ const MarketingHome = () => {
                 notifyToast({ message: 'Check your email to confirm your account, then sign in.', variant: 'info' });
                 return;
             }
-            await runNewUserProvisioning({
-                displayName: trimmedCompany,
-                photoURL: 'https://raw.githubusercontent.com/t4agents/t4agents/refs/heads/main/t4favicon.png',
-            });
+            await runNewUserProvisioning();
             navigate('/app');
         } catch (error: unknown) {
             const rawMessage =
