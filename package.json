@@ -1,9 +1,9 @@
 {
-    "name": "t4",
+    "name": "t4too",
     "private": true,
     "workspaces": [
-        "t4agents",
-        "ainvoaice",
+        "web_t4",
+        "web_inv",
         "shared/*"
     ]
 }
