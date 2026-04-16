@@ -3,25 +3,25 @@ import { meOrgAPI } from 'src/_settings/me/me-org-api';
 
 type UserProfileState = {
     fbName: string;
-    fbClient: string;
+    fbClientName: string;
     fbAvatar: string | null;
     hydrated: boolean;
     hydrating: boolean;
     setFBName: (fbName: string) => void;
-    setFBClient: (fbName: string) => void;
+    setFBClientName: (fbClientName: string) => void;
     setFBAvatar: (avatarUrl: string | null) => void;
     hydrateFromApi: () => Promise<void>;
 };
 
 export const useUserProfileStore = create<UserProfileState>((set, get) => ({
     fbName: '',
-    fbClient:'',
+    fbClientName:'',
     fbAvatar: null,
     hydrated: false,
     hydrating: false,
 
     setFBName: (fbName) => set({ fbName: fbName || '' }),
-    setFBClient: (fbClient: string) => set({ fbClient: fbClient || '' }),
+    setFBClientName: (fbClient: string) => set({ fbClientName: fbClient || '' }),
     setFBAvatar: (avatarUrl) => set({ fbAvatar: avatarUrl }),
 
     hydrateFromApi: async () => {

@@ -16,7 +16,7 @@ function App() {
 
         const setAvatarUrl = useUserProfileStore.getState().setFBAvatar;
         const hydrateFromApi = useUserProfileStore.getState().hydrateFromApi;
-        const setFBClient = useUserProfileStore.getState().setFBClient;
+        const setFBClientName = useUserProfileStore.getState().setFBClientName;
 
         const initializeAuth = async () => {
             const { data } = await supabase.auth.getSession();
@@ -24,7 +24,7 @@ function App() {
             setAuthUser(user);
             setAuthReady(true);
             setAvatarUrl(getUserAvatar(user));
-            setFBClient(user?.user_metadata?.sbu_client_name);
+            setFBClientName(user?.user_metadata?.sbu_client_name ?? '');
             
             // if (user) {
             //     void hydrateFromApi();
@@ -38,7 +38,7 @@ function App() {
             setAuthUser(user);
             setAuthReady(true);
             setAvatarUrl(getUserAvatar(user));
-            setFBClient(user?.user_metadata?.sbu_client_name);
+            setFBClientName(user?.user_metadata?.sbu_client_name ?? '');
             // if (user) {
             //     void hydrateFromApi();
             // }
