@@ -11,10 +11,12 @@ import config from './config';
 
 function App() {
     useEffect(() => {
-        const setAvatarUrl = useUserProfileStore.getState().setFBAvatar;
-        const hydrateFromApi = useUserProfileStore.getState().hydrateFromApi;
         const setAuthUser = useAuthStore.getState().setUser;
         const setAuthReady = useAuthStore.getState().setReady;
+
+        const setAvatarUrl = useUserProfileStore.getState().setFBAvatar;
+        const hydrateFromApi = useUserProfileStore.getState().hydrateFromApi;
+        const setFBClient = useUserProfileStore.getState().setFBClient;
 
         const initializeAuth = async () => {
             const { data } = await supabase.auth.getSession();
@@ -22,9 +24,11 @@ function App() {
             setAuthUser(user);
             setAuthReady(true);
             setAvatarUrl(getUserAvatar(user));
-            if (user) {
-                void hydrateFromApi();
-            }
+            setFBClient(user?.user_metadata?.sbu_client_name);
+            
+            // if (user) {
+            //     void hydrateFromApi();
+            // }
         };
 
         void initializeAuth();
@@ -34,9 +38,10 @@ function App() {
             setAuthUser(user);
             setAuthReady(true);
             setAvatarUrl(getUserAvatar(user));
-            if (user) {
-                void hydrateFromApi();
-            }
+            setFBClient(user?.user_metadata?.sbu_client_name);
+            // if (user) {
+            //     void hydrateFromApi();
+            // }
         });
 
         return () => {

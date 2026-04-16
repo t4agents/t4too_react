@@ -80,7 +80,7 @@ const AuthLogin = () => {
             if (error) {throw error;}
 
             
-            await completeAuthLogin(navigate, setClients, setActiveBE);
+            // await completeAuthLogin(navigate, setClients, setActiveBE);
         } catch (error: any) {
             console.error(error);
             const mapped = mapLoginError(error);
