@@ -1,6 +1,6 @@
-import { apiFetch } from 'src/lib/apihttp';
+import { apiFetch } from 'src/core/apihttp';
 import { InterfaceBE } from 'src/types/type_be';
-import { InterfaceUser } from 'src/types/type_user';
+import { InterfaceUser } from 'src/types/type_me';
 
 
 export const meOrgAPI = {
@@ -66,12 +66,4 @@ export const meOrgAPI = {
 
         return response.json();
     },
-
-
-
-
-
-
-
-
 };

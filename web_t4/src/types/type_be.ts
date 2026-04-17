@@ -23,3 +23,12 @@ export interface InterfaceBE {
     is_deleted?: boolean;
 
 }
+
+export const EMPTY_BE: InterfaceBE = {
+    id: "",
+    name: "",
+};
+
+export function dateOnly(value?: string): string {
+    return value ? value.slice(0, 10) : "";
+}

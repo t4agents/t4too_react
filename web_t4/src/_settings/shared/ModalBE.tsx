@@ -4,25 +4,8 @@ import { Label } from "src/components/ui/label";
 import { Input } from "src/components/ui/input";
 import { Button } from "src/components/ui/button";
 import LoadingSpinner from "src/components/shared/LoadingSpinner";
-import type { OrganizationState } from "src/_settings/shared/type_me_BE";
-
-
-type PersonalState = {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    position: string;
-    facebook: string;
-    twitter: string;
-    github: string;
-    reddit: string;
-    country: string;
-    state: string;
-    pin: string;
-    zip: string;
-    taxNo: string;
-};
+import { dateOnly, type InterfaceBE } from "src/types/type_be";
+import type { PersonalState } from "src/types/type_me";
 
 
 
@@ -32,8 +15,8 @@ type UserProfileModalProps = {
     modalType: "personal" | "organization" | null;
     tempPersonal: PersonalState;
     setTempPersonal: React.Dispatch<React.SetStateAction<PersonalState>>;
-    tempOrganization: OrganizationState;
-    setTempOrganization: React.Dispatch<React.SetStateAction<OrganizationState>>;
+    tempOrganization: InterfaceBE;
+    setTempOrganization: React.Dispatch<React.SetStateAction<InterfaceBE>>;
     onSave: () => void | Promise<void>;
     isSaving?: boolean;
 };
@@ -49,6 +32,8 @@ const UserProfileModal = ({
     onSave,
     isSaving = false,
 }: UserProfileModalProps) => {
+    const text = (value?: string | number | null) => (value === undefined || value === null ? "" : String(value));
+
     if (modalType !== "personal" && modalType !== "organization") {
         return null;
     }
@@ -232,7 +217,7 @@ const UserProfileModal = ({
                                 id="orgName"
                                 placeholder="Your organization name"
                                 className="flex-1"
-                                value={tempOrganization.name}
+                                value={text(tempOrganization.name)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, name: e.target.value })}
                             />
                         </div>
@@ -244,7 +229,7 @@ const UserProfileModal = ({
                                 id="orgLegalName"
                                 placeholder="Legal registered name"
                                 className="flex-1"
-                                value={tempOrganization.legal_name}
+                                value={text(tempOrganization.legal_name)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, legal_name: e.target.value })}
                             />
                         </div>
@@ -256,7 +241,7 @@ const UserProfileModal = ({
                                 id="orgOperatingName"
                                 placeholder="Operating/trading name"
                                 className="flex-1"
-                                value={tempOrganization.operating_name}
+                                value={text(tempOrganization.operating_name)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, operating_name: e.target.value })}
                             />
                         </div>
@@ -268,7 +253,7 @@ const UserProfileModal = ({
                                 id="orgType"
                                 placeholder="Corporation, partnership, etc."
                                 className="flex-1"
-                                value={tempOrganization.business_type}
+                                value={text(tempOrganization.business_type)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, business_type: e.target.value })}
                             />
                         </div>
@@ -280,7 +265,7 @@ const UserProfileModal = ({
                                 id="orgBN"
                                 placeholder="123456789"
                                 className="flex-1"
-                                value={tempOrganization.business_number}
+                                value={text(tempOrganization.business_number)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, business_number: e.target.value })}
                             />
                         </div>
@@ -292,7 +277,7 @@ const UserProfileModal = ({
                                 id="orgPayroll"
                                 placeholder="123456789RP0001"
                                 className="flex-1"
-                                value={tempOrganization.payroll_account_number}
+                                value={text(tempOrganization.payroll_account_number)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, payroll_account_number: e.target.value })}
                             />
                         </div>
@@ -304,7 +289,7 @@ const UserProfileModal = ({
                                 id="orgRemit"
                                 placeholder="Monthly or quarterly"
                                 className="flex-1"
-                                value={tempOrganization.remittance_frequency}
+                                value={text(tempOrganization.remittance_frequency)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, remittance_frequency: e.target.value })}
                             />
                         </div>
@@ -316,7 +301,7 @@ const UserProfileModal = ({
                                 id="orgTaxYearEnd"
                                 type="date"
                                 className="flex-1"
-                                value={tempOrganization.tax_year_end}
+                                value={dateOnly(tempOrganization.tax_year_end)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, tax_year_end: e.target.value })}
                             />
                         </div>
@@ -328,7 +313,7 @@ const UserProfileModal = ({
                                 id="orgWSIB"
                                 placeholder="WSIB account number"
                                 className="flex-1"
-                                value={tempOrganization.wsib_number}
+                                value={text(tempOrganization.wsib_number)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, wsib_number: e.target.value })}
                             />
                         </div>
@@ -340,7 +325,7 @@ const UserProfileModal = ({
                                 id="orgEHT"
                                 placeholder="Employer Health Tax account"
                                 className="flex-1"
-                                value={tempOrganization.eht_account}
+                                value={text(tempOrganization.eht_account)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, eht_account: e.target.value })}
                             />
                         </div>
@@ -352,7 +337,7 @@ const UserProfileModal = ({
                                 id="orgAddress"
                                 placeholder="Street address"
                                 className="flex-1"
-                                value={tempOrganization.street_address}
+                                value={text(tempOrganization.street_address)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, street_address: e.target.value })}
                             />
                         </div>
@@ -364,7 +349,7 @@ const UserProfileModal = ({
                                 id="orgCity"
                                 placeholder="City"
                                 className="flex-1"
-                                value={tempOrganization.city}
+                                value={text(tempOrganization.city)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, city: e.target.value })}
                             />
                         </div>
@@ -376,7 +361,7 @@ const UserProfileModal = ({
                                 id="orgProvince"
                                 placeholder="Province or State"
                                 className="flex-1"
-                                value={tempOrganization.province}
+                                value={text(tempOrganization.province)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, province: e.target.value })}
                             />
                         </div>
@@ -388,7 +373,7 @@ const UserProfileModal = ({
                                 id="orgPostal"
                                 placeholder="A1A 1A1 or 12345"
                                 className="flex-1"
-                                value={tempOrganization.postal_code}
+                                value={text(tempOrganization.postal_code)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, postal_code: e.target.value })}
                             />
                         </div>
@@ -400,7 +385,7 @@ const UserProfileModal = ({
                                 id="orgCountry"
                                 placeholder="Country"
                                 className="flex-1"
-                                value={tempOrganization.country}
+                                value={text(tempOrganization.country)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, country: e.target.value })}
                             />
                         </div>
@@ -412,7 +397,7 @@ const UserProfileModal = ({
                                 id="orgPhone"
                                 placeholder="+1 (555) 123-4567"
                                 className="flex-1"
-                                value={tempOrganization.phone}
+                                value={text(tempOrganization.phone)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, phone: e.target.value })}
                             />
                         </div>
@@ -424,7 +409,7 @@ const UserProfileModal = ({
                                 id="orgEmail"
                                 placeholder="contact@company.com"
                                 className="flex-1"
-                                value={tempOrganization.email}
+                                value={text(tempOrganization.email)}
                                 readOnly
                             />
                         </div>
@@ -436,7 +421,7 @@ const UserProfileModal = ({
                                 id="orgIncorp"
                                 type="date"
                                 className="flex-1"
-                                value={tempOrganization.incorporation_date}
+                                value={dateOnly(tempOrganization.incorporation_date)}
                                 onChange={(e) => setTempOrganization({ ...tempOrganization, incorporation_date: e.target.value })}
                             />
                         </div>
@@ -450,8 +435,11 @@ const UserProfileModal = ({
                                 min="0"
                                 placeholder="Number of employees"
                                 className="flex-1"
-                                value={tempOrganization.employee_count}
-                                onChange={(e) => setTempOrganization({ ...tempOrganization, employee_count: e.target.value })}
+                                value={text(tempOrganization.employee_count)}
+                                onChange={(e) => setTempOrganization({
+                                    ...tempOrganization,
+                                    employee_count: e.target.value === "" ? undefined : Number(e.target.value),
+                                })}
                             />
                         </div>
                     </div>

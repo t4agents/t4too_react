@@ -7,11 +7,21 @@ import profileImg from "src/assets/images/profile/user-1.jpg"
 import { Button } from "src/components/ui/button";
 import { meOrgAPI } from "src/_settings/me/me-org-api";
 import UserProfileModal from "./MeOrgModal";
-import { getUserAvatar, supabase } from "src/lib/supabase";
-import { notifyToast } from "src/lib/toast";
+import { getUserAvatar, supabase } from "src/core/supabase";
+import { notifyToast } from "src/core/toast";
 import { useUserProfileStore } from "src/store/user-profile-store";
 import LoadingSpinner from "src/components/shared/LoadingSpinner";
 import { useAuthStore } from "src/store/auth-store";
+import {EMPTY_BE,dateOnly} from "src/types/type_be";
+import { resizeImage } from "src/components/helper/image-utils";
+
+import type { InterfaceBE } from "src/types/type_be";
+import {
+    EMPTY_PERSONAL,
+    mapPersonalToUserPatch,
+    mapUserToPersonal,
+    type PersonalState,
+} from "src/types/type_me";
 
 const Skeleton = ({ className = "" }: { className?: string }) => (
     <div className={`animate-pulse rounded-md bg-gray-200/70 dark:bg-gray-800/70 ${className}`} />
@@ -20,57 +30,6 @@ const Skeleton = ({ className = "" }: { className?: string }) => (
 const CLOUDINARY_CLOUD_NAME = "ddcgr5g8z";
 const CLOUDINARY_UPLOAD_PRESET = "t4preset";
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
-const MAX_AVATAR_DIMENSION = 512;
-
-async function resizeImage(file: File): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-        const image = new Image();
-        const objectUrl = URL.createObjectURL(file);
-
-        image.onload = () => {
-            const scale = Math.min(
-                1,
-                MAX_AVATAR_DIMENSION / image.width,
-                MAX_AVATAR_DIMENSION / image.height,
-            );
-
-            const targetWidth = Math.max(1, Math.round(image.width * scale));
-            const targetHeight = Math.max(1, Math.round(image.height * scale));
-
-            const canvas = document.createElement("canvas");
-            canvas.width = targetWidth;
-            canvas.height = targetHeight;
-
-            const context = canvas.getContext("2d");
-            if (!context) {
-                URL.revokeObjectURL(objectUrl);
-                reject(new Error("Could not process image."));
-                return;
-            }
-
-            context.drawImage(image, 0, 0, targetWidth, targetHeight);
-            canvas.toBlob(
-                (blob) => {
-                    URL.revokeObjectURL(objectUrl);
-                    if (!blob) {
-                        reject(new Error("Could not encode image."));
-                        return;
-                    }
-                    resolve(blob);
-                },
-                "image/jpeg",
-                0.82,
-            );
-        };
-
-        image.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            reject(new Error("Invalid image file."));
-        };
-
-        image.src = objectUrl;
-    });
-}
 
 const UserProfile = () => {
     const [openModal, setOpenModal] = useState(false);
@@ -86,22 +45,11 @@ const UserProfile = () => {
     const setStoreAvatar = useUserProfileStore((state) => state.setFBAvatar);
     const authUser = useAuthStore((state) => state.user);
 
-    const BCrumb = [
-        { to: "/", title: "Home", },
-        { title: "User Profile", },
-    ];
+    const BCrumb = [{ to: "/", title: "Home", },{ title: "User Profile", },];
 
-    const [personal, setPersonal] = useState({
-        firstName: "", lastName: "", email: "", phone: "", position: "", facebook: "", twitter: "",
-        github: "", reddit: "", country: "", state: "", pin: "", zip: "", taxNo: "", note: ""
-    });
+    const [personal, setPersonal] = useState<PersonalState>(EMPTY_PERSONAL);
 
-    const [organization, setOrganization] = useState({
-        name: "", legal_name: "", operating_name: "", business_type: "", incorporation_date: "",
-        employee_count: "", type: "", business_number: "", payroll_account_number: "", remittance_frequency: "",
-        tax_year_end: "", wsib_number: "", eht_account: "", street_address: "", city: "",
-        province: "", country: "", postal_code: "", phone: "", email: ""
-    });
+    const [organization, setOrganization] = useState<InterfaceBE>(EMPTY_BE);
 
     const [organizationId, setOrganizationId] = useState<string | null>(null);
     const [tempPersonal, setTempPersonal] = useState(personal);
@@ -125,23 +73,7 @@ const UserProfile = () => {
 
                 if (userResult.status === "fulfilled") {
                     const user = userResult.value;
-                    setPersonal({
-                        firstName: user.first_name || "",
-                        lastName: user.last_name || "",
-                        email: user.email || "",
-                        phone: user.phone || "",
-                        position: user.position || "",
-                        facebook: user.facebook || "",
-                        twitter: user.twitter || "",
-                        github: user.github || "",
-                        reddit: user.reddit || "",
-                        country: user.country || "",
-                        state: user.state || "",
-                        pin: user.pin || "",
-                        zip: user.zip || "",
-                        note: user.note || "",
-                        taxNo: user.tax_no || ""
-                    });
+                    setPersonal(mapUserToPersonal(user));
                     setStoreNames([user.first_name, user.last_name].filter(Boolean).join(' '));
                     if (user.profile_picture && !authAvatar) {
                         setCurrentProfileImg(user.profile_picture);
@@ -155,28 +87,7 @@ const UserProfile = () => {
                     const myOrg = myOrgResult.value;
                     console.log("Loaded organization (get_myorg):", myOrg);
                     setOrganizationId(myOrg.id);
-                    setOrganization({
-                        name: myOrg.name || "",
-                        legal_name: myOrg.legal_name || "",
-                        operating_name: myOrg.operating_name || "",
-                        business_type: myOrg.business_type || "",
-                        incorporation_date: myOrg.incorporation_date ? myOrg.incorporation_date.slice(0, 10) : "",
-                        employee_count: myOrg.employee_count !== undefined && myOrg.employee_count !== null ? String(myOrg.employee_count) : "",
-                        type: myOrg.type || "",
-                        business_number: myOrg.business_number || "",
-                        payroll_account_number: myOrg.payroll_account_number || "",
-                        remittance_frequency: myOrg.remittance_frequency || "",
-                        tax_year_end: myOrg.tax_year_end ? myOrg.tax_year_end.slice(0, 10) : "",
-                        wsib_number: myOrg.wsib_number || "",
-                        eht_account: myOrg.eht_account || "",
-                        street_address: myOrg.street_address || "",
-                        city: myOrg.city || "",
-                        province: myOrg.province || "",
-                        country: myOrg.country || "",
-                        postal_code: myOrg.postal_code || "",
-                        phone: myOrg.phone || "",
-                        email: myOrg.email || ""
-                    });
+                    setOrganization(myOrg);
                 } else {
                     console.error('Failed to fetch organization:', myOrgResult.reason);
                 }
@@ -268,40 +179,8 @@ const UserProfile = () => {
         setIsSavingProfile(true);
         try {
             if (modalType === "personal") {
-                const updatedUser = await meOrgAPI.patchMe({
-                    first_name: tempPersonal.firstName,
-                    last_name: tempPersonal.lastName,
-                    email: tempPersonal.email,
-                    phone: tempPersonal.phone,
-                    position: tempPersonal.position,
-                    facebook: tempPersonal.facebook,
-                    twitter: tempPersonal.twitter,
-                    github: tempPersonal.github,
-                    reddit: tempPersonal.reddit,
-                    country: tempPersonal.country,
-                    state: tempPersonal.state,
-                    pin: tempPersonal.pin,
-                    zip: tempPersonal.zip,
-                    note: tempPersonal.note,
-                    tax_no: tempPersonal.taxNo
-                });
-                setPersonal({
-                    firstName: updatedUser.first_name || "",
-                    lastName: updatedUser.last_name || "",
-                    email: updatedUser.email || "",
-                    phone: updatedUser.phone || "",
-                    position: updatedUser.position || "",
-                    facebook: updatedUser.facebook || "",
-                    twitter: updatedUser.twitter || "",
-                    github: updatedUser.github || "",
-                    reddit: updatedUser.reddit || "",
-                    country: updatedUser.country || "",
-                    state: updatedUser.state || "",
-                    pin: updatedUser.pin || "",
-                    zip: updatedUser.zip || "",
-                    taxNo: updatedUser.tax_no || "",
-                    note: updatedUser.note || ""
-                });
+                const updatedUser = await meOrgAPI.patchMe(mapPersonalToUserPatch(tempPersonal));
+                setPersonal(mapUserToPersonal(updatedUser));
                 setStoreNames([updatedUser.first_name, updatedUser.last_name].filter(Boolean).join(' '));
                 if (updatedUser.profile_picture) {
                     setCurrentProfileImg(updatedUser.profile_picture);
@@ -309,50 +188,8 @@ const UserProfile = () => {
                 }
             }
             if (modalType === "organization") {
-                const updatedMyOrg = await meOrgAPI.patchOrg({
-                    name: tempOrganization.name,
-                    legal_name: tempOrganization.legal_name,
-                    operating_name: tempOrganization.operating_name,
-                    business_type: tempOrganization.business_type,
-                    incorporation_date: tempOrganization.incorporation_date || undefined,
-                    employee_count: tempOrganization.employee_count ? Number(tempOrganization.employee_count) : undefined,
-                    type: tempOrganization.type,
-                    business_number: tempOrganization.business_number,
-                    payroll_account_number: tempOrganization.payroll_account_number,
-                    remittance_frequency: tempOrganization.remittance_frequency,
-                    tax_year_end: tempOrganization.tax_year_end || undefined,
-                    wsib_number: tempOrganization.wsib_number,
-                    eht_account: tempOrganization.eht_account,
-                    street_address: tempOrganization.street_address,
-                    city: tempOrganization.city,
-                    province: tempOrganization.province,
-                    country: tempOrganization.country,
-                    postal_code: tempOrganization.postal_code,
-                    phone: tempOrganization.phone,
-                    email: tempOrganization.email,
-                });
-                setOrganization({
-                    name: updatedMyOrg.name || "",
-                    legal_name: updatedMyOrg.legal_name || "",
-                    operating_name: updatedMyOrg.operating_name || "",
-                    business_type: updatedMyOrg.business_type || "",
-                    incorporation_date: updatedMyOrg.incorporation_date ? updatedMyOrg.incorporation_date.slice(0, 10) : "",
-                    employee_count: updatedMyOrg.employee_count !== undefined && updatedMyOrg.employee_count !== null ? String(updatedMyOrg.employee_count) : "",
-                    type: updatedMyOrg.type || "",
-                    business_number: updatedMyOrg.business_number || "",
-                    payroll_account_number: updatedMyOrg.payroll_account_number || "",
-                    remittance_frequency: updatedMyOrg.remittance_frequency || "",
-                    tax_year_end: updatedMyOrg.tax_year_end ? updatedMyOrg.tax_year_end.slice(0, 10) : "",
-                    wsib_number: updatedMyOrg.wsib_number || "",
-                    eht_account: updatedMyOrg.eht_account || "",
-                    street_address: updatedMyOrg.street_address || "",
-                    city: updatedMyOrg.city || "",
-                    province: updatedMyOrg.province || "",
-                    country: updatedMyOrg.country || "",
-                    postal_code: updatedMyOrg.postal_code || "",
-                    phone: updatedMyOrg.phone || "",
-                    email: updatedMyOrg.email || ""
-                });
+                const updatedMyOrg = await meOrgAPI.patchOrg(tempOrganization);
+                setOrganization(updatedMyOrg);
             }
             setOpenModal(false);
         } catch (error) {
@@ -512,7 +349,7 @@ const UserProfile = () => {
                                     <div><p className="text-xs text-gray-500">Business Number (BN)</p><p>{organization.business_number || "123456789"}</p></div>
                                     <div><p className="text-xs text-gray-500">Payroll Account No.</p><p>{organization.payroll_account_number || "123456789RP0001"}</p></div>
                                     <div><p className="text-xs text-gray-500">Remittance Frequency</p><p>{organization.remittance_frequency || "Monthly"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Tax Year End</p><p>{organization.tax_year_end || "YYYY-MM-DD"}</p></div>
+                                    <div><p className="text-xs text-gray-500">Tax Year End</p><p>{dateOnly(organization.tax_year_end) || "YYYY-MM-DD"}</p></div>
                                     <div>
                                         <p className="text-xs text-gray-500">Address</p>
                                         <p>
@@ -526,7 +363,7 @@ const UserProfile = () => {
                                     </div>
                                     <div><p className="text-xs text-gray-500">Phone</p><p>{organization.phone || "+1 (555) 123-4567"}</p></div>
                                     <div><p className="text-xs text-gray-500">Country</p><p>{organization.country || "Canada"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Employee Count</p><p>{organization.employee_count || "Number of employees"}</p></div>
+                                    <div><p className="text-xs text-gray-500">Employee Count</p><p>{organization.employee_count ?? "Number of employees"}</p></div>
                                 </>
                             )}
                         </div>
