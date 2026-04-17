@@ -5,7 +5,7 @@ import { InterfaceUser } from 'src/types/type_user';
 
 export const meOrgAPI = {
     async getMe(): Promise<InterfaceUser> {
-        const response = await apiFetch('/settings/userprofile', {method: 'GET',});
+        const response = await apiFetch('/settings/getme', {method: 'GET',});
         if (!response.ok) {throw new Error(`Failed to fetch organization: ${response.statusText}`);}
         return response.json();
     },
