@@ -60,7 +60,7 @@ const MarketingHome = () => {
             if (error) {
                 throw error;
             }
-            await completeAuthLogin(navigate, setClients, setActiveBE);
+            await completeAuthLogin(navigate);
         } catch (error: unknown) {
             const rawMessage =
                 typeof error === 'object' && error !== null && 'message' in error

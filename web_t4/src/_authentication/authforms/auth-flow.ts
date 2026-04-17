@@ -13,32 +13,32 @@ export type SetActiveBE = (active: ActiveBE) => void;
 
 export async function completeAuthLogin(
     navigate: NavigateFunction,
-    setClients: SetClients,
-    setActiveBE: SetActiveBE
+    // setClients: SetClients,
+    // setActiveBE: SetActiveBE
 ): Promise<void> {
-    let clients: InterfaceBE[] = [];
-    let activeClientId: string | null = null;
+    // let clients: InterfaceBE[] = [];
+    // let activeClientId: string | null = null;
 
-    try {
-        const payload = await clientsAPI.listClients();
-        clients = payload.clients;
-        activeClientId = payload.activeClientId;
-    } catch (error) {
-        console.error('Failed to load clients after sign-in:', error);
-    }
+    // try {
+    //     const payload = await clientsAPI.listClients();
+    //     clients = payload.clients;
+    //     activeClientId = payload.activeClientId;
+    // } catch (error) {
+    //     console.error('Failed to load clients after sign-in:', error);
+    // }
 
-    setClients(clients);
+    // // setClients(clients);
 
-    const firstClient = clients.find((client) => client.id === activeClientId) ?? null;
-    const activeBE =
-        firstClient?.id && firstClient?.name
-            ? {
-                active_zbid: firstClient.id,
-                name: firstClient.name,
-            }
-            : null;
+    // const firstClient = clients.find((client) => client.id === activeClientId) ?? null;
+    // const activeBE =
+    //     firstClient?.id && firstClient?.name
+    //         ? {
+    //             active_zbid: firstClient.id,
+    //             name: firstClient.name,
+    //         }
+    //         : null;
 
-    setActiveBE(activeBE);
+    // setActiveBE(activeBE);
     navigate("/app");
 }
 

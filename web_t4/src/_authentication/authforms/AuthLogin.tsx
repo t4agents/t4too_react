@@ -10,7 +10,7 @@ import { supabase } from "src/lib/supabase";
 import { notifyToast } from "src/lib/toast";
 import AuthLoadingOverlay from "./AuthLoadingOverlay";
 import { useClientStore } from "src/store/client-store";
-import { completeAuthLogin } from "./auth-flow";
+// import { completeAuthLogin } from "./auth-flow";
 
 const STATUS_MESSAGES = [
     "Verifying your credentials...",

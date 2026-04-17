@@ -12,7 +12,7 @@ export const meOrgAPI = {
 
 
     async getMyOrg(): Promise<InterfaceBE> {
-        const response = await apiFetch('/zme/get_myorg', {method: 'GET',});
+        const response = await apiFetch('/settings/getbe', {method: 'GET',});
         if (!response.ok) {throw new Error(`Failed to fetch user: ${response.statusText}`);}
         
         return response.json();
