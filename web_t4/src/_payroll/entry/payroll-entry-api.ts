@@ -1,5 +1,5 @@
 import { PayrollSchedule } from 'src/types/payroll';
-import { apiFetch } from 'src/lib/apihttp';
+import { apiFetch } from 'src/core/apihttp';
 
 
 interface ListPayrollSchedulesParams {

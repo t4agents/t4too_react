@@ -7,7 +7,7 @@ import { Button } from 'src/components/ui/button';
 import { Card, CardContent } from 'src/components/ui/card';
 import { Table, TBody, TCell, THead, THeader, TRow } from 'src/components/ui/table';
 import LoadingSpinner from 'src/components/shared/LoadingSpinner';
-import { formatDate, formatMoney } from 'src/lib/format';
+import { formatDate, formatMoney } from 'src/core/format';
 
 const BCrumb = [
     { to: '/', title: 'Home' },

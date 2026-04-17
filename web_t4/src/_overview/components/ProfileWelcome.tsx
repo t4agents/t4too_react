@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import userImg from 'src/assets/images/profile/user-1.jpg';
 import supportImg from 'src/assets/images/dashboard/customer-support-img.png';
 import { useUserProfileStore } from 'src/store/user-profile-store';
-import { getUserAvatar } from 'src/lib/supabase';
+import { getUserAvatar } from 'src/core/supabase';
 import { useAuthStore } from 'src/store/auth-store';
 
 const ProfileWelcome = () => {

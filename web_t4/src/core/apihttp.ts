@@ -1,6 +1,6 @@
 import { config } from 'src/config';
-import { getAccessToken } from 'src/lib/supabase';
-import { notifyToast } from 'src/lib/toast';
+import { getAccessToken } from 'src/core/supabase';
+import { notifyToast } from 'src/core/toast';
 import { waitForAuthReady } from 'src/store/auth-store';
 
 const API_BASE_URL = config.api.baseUrl;

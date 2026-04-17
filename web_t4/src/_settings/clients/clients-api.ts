@@ -1,4 +1,4 @@
-import { apiFetch } from 'src/lib/apihttp';
+import { apiFetch } from 'src/core/apihttp';
 import { InterfaceBE } from 'src/types/type_be';
 
 export interface ListClientsResponse {

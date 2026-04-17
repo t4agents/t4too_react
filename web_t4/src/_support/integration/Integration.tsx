@@ -4,7 +4,7 @@ import BreadcrumbComp from 'src/_layouts/shared/breadcrumb/BreadcrumbComp';
 import CardBox from 'src/components/shared/CardBox';
 import { Button } from 'src/components/ui/button';
 import { Input } from 'src/components/ui/input';
-import { notifyToast } from 'src/lib/toast';
+import { notifyToast } from 'src/core/toast';
 import {
     Dialog,
     DialogContent,

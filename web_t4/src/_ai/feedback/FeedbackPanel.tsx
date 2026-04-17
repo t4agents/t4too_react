@@ -5,7 +5,7 @@ import { Checkbox } from 'src/components/ui/checkbox';
 import { Textarea } from 'src/components/ui/textarea';
 import { feedbackAPI } from 'src/_ai/feedback/ai-feedback-api';
 import { PayrollHistoryResponse } from 'src/_payroll/history/payroll-history-api';
-import { formatDate } from 'src/lib/format';
+import { formatDate } from 'src/core/format';
 
 type EvidenceItem = {
     label: string;

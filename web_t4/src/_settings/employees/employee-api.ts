@@ -1,5 +1,5 @@
 import { Employee } from 'src/types/employee';
-import { apiFetch } from 'src/lib/apihttp';
+import { apiFetch } from 'src/core/apihttp';
 import type { PaginationInterface } from 'src/types/interface_pagination';
 import { useClientStore } from 'src/store/client-store';
 

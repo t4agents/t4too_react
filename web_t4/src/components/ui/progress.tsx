@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as ProgressPrimitive from '@radix-ui/react-progress';
 import { cva, type VariantProps } from 'class-variance-authority';
 
-import { cn } from 'src/lib/utils';
+import { cn } from 'src/core/utils';
 
 // Define the variants using cva
 const progressIndicatorVariants = cva('h-full w-full flex-1 transition-all', {

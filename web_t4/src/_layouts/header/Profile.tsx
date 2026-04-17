@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Button } from 'src/components/ui/button';
 
 import { useNavigate } from "react-router-dom";
-import { supabase, getUserAvatar } from "src/lib/supabase";
+import { supabase, getUserAvatar } from "src/core/supabase";
 import { useUserProfileStore } from 'src/store/user-profile-store';
 import { useTheme } from 'src/components/provider/theme-provider';
 import { useAuthStore } from 'src/store/auth-store';

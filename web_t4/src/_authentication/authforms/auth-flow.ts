@@ -3,8 +3,8 @@ import type { NavigateFunction } from "react-router-dom";
 import { clientsAPI } from "src/_settings/clients/clients-api";
 import type { InterfaceBE } from "src/_settings/clients/clients-api";
 import { config } from "src/config";
-import { apiFetch } from "src/lib/apihttp";
-import { getAccessToken, supabase } from "src/lib/supabase";
+import { apiFetch } from "src/core/apihttp";
+import { getAccessToken, supabase } from "src/core/supabase";
 
 type ActiveBE = { active_zbid: string; name: string } | null;
 

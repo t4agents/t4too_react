@@ -325,7 +325,7 @@ const UserProfile = () => {
                                 </>
                             ) : (
                                 <>
-                                    <div><p className="text-xs text-gray-500">Name</p><p>{organization.name || "Organization name"}</p></div>
+                                    <div><p className="text-xs text-gray-500">Operating Name</p><p>{organization.operating_name || "Org name"}</p></div>
                                     <div><p className="text-xs text-gray-500">Business Type</p><p>{organization.business_type || "Corporation, partnership, etc."}</p></div>
                                     <div><p className="text-xs text-gray-500">Business Number (BN)</p><p>{organization.business_number || "123456789"}</p></div>
                                     <div><p className="text-xs text-gray-500">Payroll Account No.</p><p>{organization.payroll_account_number || "123456789RP0001"}</p></div>

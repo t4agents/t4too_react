@@ -6,7 +6,7 @@ import { Input } from 'src/components/ui/input';
 import { Badge } from 'src/components/ui/badge';
 import { FeedbackPanel } from 'src/_ai/feedback/FeedbackPanel';
 import { historyAPI, PayrollHistoryResponse } from 'src/_payroll/history/payroll-history-api';
-import { formatDate, formatMoney } from 'src/lib/format';
+import { formatDate, formatMoney } from 'src/core/format';
 
 interface EvidenceItem {
     label: string;

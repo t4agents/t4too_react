@@ -1,4 +1,4 @@
-import { cn } from 'src/lib/utils';
+import { cn } from 'src/core/utils';
 
 type LoadingSpinnerProps = {
   size?: 'sm' | 'md' | 'lg';

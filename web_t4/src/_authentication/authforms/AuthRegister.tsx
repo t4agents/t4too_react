@@ -6,11 +6,11 @@ import { Button } from "src/components/ui/button";
 import { Input } from "src/components/ui/input";
 import { Label } from "src/components/ui/label";
 
-import { supabase } from "src/lib/supabase";
-import { notifyToast } from "src/lib/toast";
+import { supabase } from "src/core/supabase";
+import { notifyToast } from "src/core/toast";
 import AuthLoadingOverlay from "./AuthLoadingOverlay";
 import { runNewUserProvisioning } from "./auth-flow";
-import { apiGetJson } from "src/lib/apihttp";
+import { apiGetJson } from "src/core/apihttp";
 
 const STATUS_MESSAGES = [
     "Setting up your account...",

@@ -3,8 +3,8 @@ import React from "react";
 import Google from "/src/assets/images/svgs/google-icon.svg";
 import FB from "/src/assets//images/svgs/icon-facebook.png";
 
-import { supabase } from "src/lib/supabase";
-import { notifyToast } from "src/lib/toast";
+import { supabase } from "src/core/supabase";
+import { notifyToast } from "src/core/toast";
 import AuthLoadingOverlay from "./AuthLoadingOverlay";
 
 

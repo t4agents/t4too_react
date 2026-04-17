@@ -4,8 +4,8 @@ import { Icon } from "@iconify/react";
 import BreadcrumbComp from "src/_layouts/shared/breadcrumb/BreadcrumbComp";
 import CardBox from "src/components/shared/CardBox";
 import { Button } from "src/components/ui/button";
-import { apiFetch } from "src/lib/apihttp";
-import { notifyToast } from "src/lib/toast";
+import { apiFetch } from "src/core/apihttp";
+import { notifyToast } from "src/core/toast";
 
 const BCrumb = [
     { to: "/", title: "Home" },

@@ -10,7 +10,7 @@ import { entryAPI } from 'src/_payroll/entry/payroll-entry-api';
 import { useClientStore } from 'src/store/client-store';
 import { PayrollSchedule } from 'src/types/payroll';
 import { Link, useNavigate } from 'react-router';
-import { formatDate, formatMoney, toNumber } from 'src/lib/format';
+import { formatDate, formatMoney, toNumber } from 'src/core/format';
 import { historyAPI } from 'src/_payroll/history/payroll-history-api';
 import EmployeePickerModal from 'src/_payroll/entry/components/EmployeePickerModal';
 import { Employee } from 'src/types/employee';

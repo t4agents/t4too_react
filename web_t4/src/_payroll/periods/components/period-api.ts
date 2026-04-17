@@ -1,4 +1,4 @@
-import { apiFetch } from "src/lib/apihttp";
+import { apiFetch } from "src/core/apihttp";
 import type { PayrollPeriod } from "src/types/payroll";
 
 type ListPayrollPeriodsParams = {

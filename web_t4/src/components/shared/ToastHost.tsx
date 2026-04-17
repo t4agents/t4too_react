@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { toastEventName } from "src/lib/toast";
+import { toastEventName } from "src/core/toast";
 
 type ToastItem = {
     id: string;

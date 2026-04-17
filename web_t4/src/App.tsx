@@ -4,7 +4,7 @@ import './assets/css/globals.css';
 import { ThemeProvider } from './components/provider/theme-provider';
 import ToastHost from './components/shared/ToastHost';
 import { useEffect } from 'react';
-import { supabase, getUserAvatar } from './lib/supabase';
+import { supabase, getUserAvatar } from './core/supabase';
 import { useUserProfileStore } from './store/user-profile-store';
 import { useAuthStore } from './store/auth-store';
 import config from './config';

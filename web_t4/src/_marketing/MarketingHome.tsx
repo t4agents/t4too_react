@@ -1,8 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import landingCssUrl from '../assets/css/landing.css?url';
-import { supabase } from 'src/lib/supabase';
-import { notifyToast } from 'src/lib/toast';
+import { supabase } from 'src/core/supabase';
+import { notifyToast } from 'src/core/toast';
 import { useClientStore } from 'src/store/client-store';
 import { completeAuthLogin, runNewUserProvisioning } from '../_authentication/authforms/auth-flow';
 
