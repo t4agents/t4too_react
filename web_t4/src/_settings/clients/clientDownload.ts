@@ -1,23 +1,22 @@
-import type { InterfaceBE } from 'src/types/type_be';
+import type { ClientDB } from 'src/types/type_client';
+import { getClientDisplayName } from 'src/types/type_client';
 
 const headers = [
     'Client Name',
-    'City',
-    'Province',
+    'Contact',
     'Phone',
     'Email',
-    'Employee Count',
+    'Status',
 ];
 
-export const downloadClientsCsv = (rows: InterfaceBE[]) => {
+export const downloadClientsCsv = (rows: ClientDB[]) => {
     if (!rows.length) return;
     const dataRows = rows.map((row) => [
-        row.name,
-        row.city,
-        row.province,
-        row.phone,
-        row.email,
-        row.employee_count,
+        getClientDisplayName(row),
+        row.client_contact_name,
+        row.client_mainphone ?? row.phone,
+        row.client_email ?? row.email,
+        row.client_status,
     ]);
     const csv = [headers, ...dataRows]
         .map((line) => line.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))

@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 
 import { TbDotsVertical } from 'react-icons/tb';
 import { Icon } from '@iconify/react';
-import { InterfaceBE } from 'src/types/type_be';
+import { ClientDB, getClientDisplayName, getClientId } from 'src/types/type_client';
 
 import { Checkbox } from 'src/components/ui/checkbox';
 import LoadingSpinner from 'src/components/shared/LoadingSpinner';
@@ -27,7 +27,7 @@ const BCrumb = [
 const pageSize = 20;
 
 const Clients = () => {
-    const [clients, setClients] = useState<InterfaceBE[]>([]);
+    const [clients, setClients] = useState<ClientDB[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isSwitchingActive, setIsSwitchingActive] = useState(false);
     const [query, setQuery] = useState('');
@@ -36,20 +36,30 @@ const Clients = () => {
     const activeBE = useClientStore((state) => state.activeBE);
     const setActiveBE = useClientStore((state) => state.setActiveBE);
     const activeClientId = activeBE?.active_zbid ?? null;
-    const selectedClient: InterfaceBE | null = clients.find((client) => client.id === activeClientId) || null;
+    const selectedClient: ClientDB | null =
+        clients.find((client) => getClientId(client) === activeClientId) || null;
+
     const refreshClients = async () => {
         setIsLoading(true);
         try {
             const data = await clientsAPI.listClients();
             const nextClients = data.clients;
             setClients(nextClients);
-            setStoreClients(nextClients);
-            const nextActiveClient = nextClients.find((client) => client.id === data.activeClientId) ?? null;
+            setStoreClients(
+                nextClients
+                    .map((client) => ({
+                        id: getClientId(client),
+                        name: getClientDisplayName(client),
+                    }))
+                    .filter((client) => client.id),
+            );
+            const nextActiveClient =
+                nextClients.find((client) => getClientId(client) === data.activeClientId) ?? null;
 
             if (nextActiveClient) {
                 setActiveBE({
-                    active_zbid: nextActiveClient.id,
-                    name: nextActiveClient.name,
+                    active_zbid: getClientId(nextActiveClient),
+                    name: getClientDisplayName(nextActiveClient) || getClientId(nextActiveClient),
                 });
                 return;
             }
@@ -61,7 +71,7 @@ const Clients = () => {
     };
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingClient, setEditingClient] = useState<any | null>(null);
+    const [editingClient, setEditingClient] = useState<ClientDB | null>(null);
 
     const handleCheckboxChange = async (clientId: string) => {
         const nextBizId = activeClientId === clientId ? null : clientId;
@@ -74,10 +84,10 @@ const Clients = () => {
         }
 
         const previousActiveBE = activeBE;
-        const selected = clients.find((client) => client.id === nextBizId);
+        const selected = clients.find((client) => getClientId(client) === nextBizId);
         setActiveBE({
             active_zbid: nextBizId,
-            name: selected?.name || nextBizId,
+            name: selected ? getClientDisplayName(selected) || nextBizId : nextBizId,
         });
         setIsSwitchingActive(true);
         try {
@@ -103,16 +113,14 @@ const Clients = () => {
         setIsModalOpen(true);
     };
 
-    const handleEditClient = (client: any) => {
+    const handleEditClient = (client: ClientDB) => {
         setEditingClient(client);
         setIsModalOpen(true);
     };
 
     const handleDeleteClient = async (clientId: string) => {
-        console.log("--------", clientId)
         try {
             await clientsAPI.softDeleteClient(clientId);
-            // reload
             await fetchClients();
         } catch (err) {
             console.error('Failed to delete client:', err);
@@ -156,13 +164,12 @@ const Clients = () => {
                 items={BCrumb}
                 leftContent={
                     selectedClient ? (
-                        // <Card className="p-4 gap-2 bg-muted/50">
                         <Card className="w-auto gap-1 p-3 rounded-md border-secondary/20 bg-lightsecondary/10 shadow-none">
                             <CardHeader className="pb-1">
                                 <CardTitle className="text-sm font-medium">Active Workspace</CardTitle>
                             </CardHeader>
                             <CardContent className="pt-0">
-                                <p className="text-base font-semibold mb-1">{selectedClient.name}</p>
+                                <p className="text-base font-semibold mb-1">{getClientDisplayName(selectedClient)}</p>
                             </CardContent>
                         </Card>
                     ) : (
@@ -212,10 +219,10 @@ const Clients = () => {
                         <THeader>
                             <TRow>
                                 <THead className="text-sm font-semibold pl-11">Client Name</THead>
-                                <THead className="text-sm font-semibold">City, Province</THead>
+                                <THead className="text-sm font-semibold">Contact</THead>
                                 <THead className="text-sm font-semibold">Phone</THead>
                                 <THead className="text-sm font-semibold">Email</THead>
-                                <THead className="text-sm font-semibold">Employees</THead>
+                                <THead className="text-sm font-semibold">Status</THead>
                                 <THead className="text-sm font-semibold">Actions</THead>
                             </TRow>
                         </THeader>
@@ -232,56 +239,51 @@ const Clients = () => {
                                     No clients found
                                 </TCell></TRow>
                             ) : (
-                                pageData.map((client) => (
-                                    <TRow
-                                        key={client.id}
-                                        className={
-                                            activeClientId === client.id
-                                                ? 'bg-primary/5'
-                                                : ''
-                                        }
-                                    >
-                                        {/* Client Name */}
-                                        <TCell className="font-semibold">
-                                            <div
-                                                className="flex items-center gap-3 cursor-pointer"
-                                                onClick={() =>
-                                                    void handleCheckboxChange(client.id)
-                                                }
-                                            >
-                                                <Checkbox
-                                                    checked={activeClientId === client.id}
-                                                    onCheckedChange={() =>
-                                                        void handleCheckboxChange(client.id)
-                                                    }
-                                                />
-                                                {client.name}
-                                            </div>
-                                        </TCell>
+                                pageData.map((client, index) => {
+                                    const clientId = getClientId(client);
+                                    const clientName = getClientDisplayName(client);
+                                    return (
+                                        <TRow
+                                            key={clientId || `client-${index}`}
+                                            className={activeClientId === clientId ? 'bg-primary/5' : ''}
+                                        >
+                                            <TCell className="font-semibold">
+                                                <div
+                                                    className="flex items-center gap-3 cursor-pointer"
+                                                    onClick={() => clientId && void handleCheckboxChange(clientId)}
+                                                >
+                                                    <Checkbox
+                                                        checked={Boolean(clientId) && activeClientId === clientId}
+                                                        onCheckedChange={() => clientId && void handleCheckboxChange(clientId)}
+                                                    />
+                                                    {clientName}
+                                                </div>
+                                            </TCell>
 
-                                        <TCell className="text-muted-foreground text-sm">{client.city}, {client.province}</TCell>
-                                        <TCell className="text-muted-foreground text-sm">{client.phone}</TCell>
-                                        <TCell className="text-muted-foreground text-sm">{client.email}</TCell>
-                                        <TCell className="text-center text-sm">{client.employee_count}</TCell>
-                                        <TCell>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <span className="h-9 w-9 flex justify-center items-center rounded-full hover:bg-lightprimary hover:text-primary cursor-pointer">
-                                                        <TbDotsVertical size={22} />
-                                                    </span>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="w-40">
-                                                    <DropdownMenuItem className="flex gap-3 items-center cursor-pointer" onClick={() => handleEditClient(client)}>
-                                                        <Icon icon={'solar:pen-new-square-broken'} height={18} /><span>Edit</span>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem className="flex gap-3 items-center cursor-pointer" onClick={() => handleDeleteClient(client.id)}>
-                                                        <Icon icon={'solar:trash-bin-minimalistic-outline'} height={18} /><span>Delete</span>
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </TCell>
-                                    </TRow>
-                                ))
+                                            <TCell className="text-muted-foreground text-sm">{client.client_contact_name || '-'}</TCell>
+                                            <TCell className="text-muted-foreground text-sm">{client.client_mainphone ?? client.phone}</TCell>
+                                            <TCell className="text-muted-foreground text-sm">{client.client_email ?? client.email}</TCell>
+                                            <TCell className="text-center text-sm">{client.client_status || '-'}</TCell>
+                                            <TCell>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <span className="h-9 w-9 flex justify-center items-center rounded-full hover:bg-lightprimary hover:text-primary cursor-pointer">
+                                                            <TbDotsVertical size={22} />
+                                                        </span>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-40">
+                                                        <DropdownMenuItem className="flex gap-3 items-center cursor-pointer" onClick={() => handleEditClient(client)}>
+                                                            <Icon icon={'solar:pen-new-square-broken'} height={18} /><span>Edit</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem className="flex gap-3 items-center cursor-pointer" onClick={() => clientId && handleDeleteClient(clientId)}>
+                                                            <Icon icon={'solar:trash-bin-minimalistic-outline'} height={18} /><span>Delete</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TCell>
+                                        </TRow>
+                                    );
+                                })
                             )}
                         </TBody>
                     </Table>

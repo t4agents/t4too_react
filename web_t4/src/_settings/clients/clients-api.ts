@@ -1,30 +1,52 @@
 import { apiFetch } from 'src/core/apihttp';
-import { InterfaceBE } from 'src/types/type_be';
+import { ClientDB, getClientId } from 'src/types/type_client';
 
 export interface ListClientsResponse {
     ztid?: string;
     zuid?: string;
     zbid?: string;
-    zbe_list?: InterfaceBE[];
+    zbe_list?: ClientDB[];
+    clients?: ClientDB[];
 }
 
 export interface NormalizedClientsPayload {
-    clients: InterfaceBE[];
+    clients: ClientDB[];
     activeClientId: string | null;
+}
+
+function asClientRecord(value: unknown): ClientDB | null {
+    if (!value || typeof value !== 'object') {
+        return null;
+    }
+    const client = value as ClientDB;
+    const resolvedId = getClientId(client);
+    if (!client.id && resolvedId) {
+        return { ...client, id: resolvedId };
+    }
+    return client;
+}
+
+function normalizeClientArray(list: unknown): ClientDB[] {
+    if (!Array.isArray(list)) {
+        return [];
+    }
+    return list
+        .map(asClientRecord)
+        .filter((client): client is ClientDB => client !== null);
 }
 
 export function normalizeClientsPayload(data: unknown): NormalizedClientsPayload {
     if (Array.isArray(data)) {
-        const clients = data as InterfaceBE[];
+        const clients = normalizeClientArray(data);
         return {
             clients,
-            activeClientId: clients[0]?.id ?? null,
+            activeClientId: clients.length ? getClientId(clients[0]) || null : null,
         };
     }
 
     if (data && typeof data === 'object') {
         const payload = data as ListClientsResponse;
-        const clients = Array.isArray(payload.zbe_list) ? payload.zbe_list : [];
+        const clients = normalizeClientArray(payload.zbe_list ?? payload.clients ?? []);
         const activeClientId = payload.zbid ?? payload.zuid ?? null;
         return { clients, activeClientId };
     }
@@ -36,8 +58,7 @@ export function normalizeClientsPayload(data: unknown): NormalizedClientsPayload
 }
 
 export const clientsAPI = {
-    // 新增接口：创建客户
-    async createClient(data: Omit<InterfaceBE, 'id'>) {
+    async createClient(data: Partial<ClientDB>) {
         const response = await apiFetch('/be/new', {
             method: 'POST',
             body: JSON.stringify(data),
@@ -55,7 +76,7 @@ export const clientsAPI = {
 
     // 获取客户列表
     async listClients() {
-        const response = await apiFetch('/be/list');
+        const response = await apiFetch('/settings/get_client_list');
         if (!response.ok) {throw new Error(`Failed to fetch clients: ${response.statusText}`);}
         const data = await response.json();
         return normalizeClientsPayload(data);
@@ -63,11 +84,15 @@ export const clientsAPI = {
 
 
     // patchbyid
-    async updateClient(id: string, data: Partial<InterfaceBE>) {
-        console.log('Updating client with ID:', id, 'Data:', data);
+    async updateClient(id: string, data: Partial<ClientDB>) {
+        const payload: Partial<ClientDB> = {
+            ...data,
+            id: data.id ?? id,
+            client_id: data.client_id ?? id,
+        };
         const response = await apiFetch(`/be/edit`, {
             method: 'PATCH',
-            body: JSON.stringify(data),
+            body: JSON.stringify(payload),
         });
 
         if (!response.ok) {
@@ -114,4 +139,4 @@ export const clientsAPI = {
 };
 
 export default clientsAPI;
-export type { InterfaceBE };
+export type InterfaceBE = ClientDB;

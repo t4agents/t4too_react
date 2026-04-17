@@ -9,36 +9,38 @@ import {
     DialogHeader,
     DialogTitle,
 } from 'src/components/ui/dialog';
-import { clientsAPI, InterfaceBE } from 'src/_settings/clients/clients-api';
+import { clientsAPI } from 'src/_settings/clients/clients-api';
+import type { ClientDB } from 'src/types/type_client';
 import LoadingSpinner from 'src/components/shared/LoadingSpinner';
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
     onComplete: () => void;
-    initialData?: any;
+    initialData?: ClientDB | null;
 }
 
 const BizEntityFormModal = ({ isOpen, onClose, onComplete, initialData }: Props) => {
+    const today = new Date().toISOString().split('T')[0];
     const [type, setType] = useState('FIRM');
     const [id, setId] = useState<string | null>(null);
-    const [name, setName] = useState('');
+    const [companyName, setCompanyName] = useState('');
     const [businessNumber, setBusinessNumber] = useState('');
     const [payrollAccountNumber, setPayrollAccountNumber] = useState('');
     const [province, setProvince] = useState('ON');
     const [streetAddress, setStreetAddress] = useState('');
     const [country, setCountry] = useState('Canada');
-    const [postalCode, setPostalCode] = useState('M5M M5M');
+    const [postalCode, setPostalCode] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
     const [wsibNumber, setWsibNumber] = useState('');
     const [ehtAccount, setEhtAccount] = useState('');
     const [remittanceFrequency, setRemittanceFrequency] = useState('monthly');
-    const [taxYearEnd, setTaxYearEnd] = useState(new Date().toISOString().split('T')[0]);
+    const [taxYearEnd, setTaxYearEnd] = useState(today);
     const [legalName, setLegalName] = useState('');
     const [operatingName, setOperatingName] = useState('');
     const [businessType, setBusinessType] = useState('');
-    const [incorporationDate, setIncorporationDate] = useState(new Date().toISOString().split('T')[0]);
+    const [incorporationDate, setIncorporationDate] = useState(today);
     const [employeeCount, setEmployeeCount] = useState<number>(0);
 
     const [loading, setLoading] = useState(false);
@@ -46,74 +48,82 @@ const BizEntityFormModal = ({ isOpen, onClose, onComplete, initialData }: Props)
 
     useEffect(() => {
         if (initialData) {
-            setType(initialData.type || 'FIRM');
-            setId(initialData.id || null);
-            setName(initialData.name || '');
-            setBusinessNumber(initialData.business_number || '');
-            setPayrollAccountNumber(initialData.payroll_account_number || '');
-            setProvince(initialData.province || 'ON');
-            setStreetAddress(initialData.street_address || '');
-            setCountry(initialData.Country || '');
-            setPostalCode(initialData.postal_code || '');
-            setPhone(initialData.phone || '');
-            setEmail(initialData.email || '');
-            setWsibNumber(initialData.wsib_number || '');
-            setEhtAccount(initialData.eht_account || '');
-            setRemittanceFrequency(initialData.remittance_frequency || 'monthly');
-            setTaxYearEnd(initialData.tax_year_end ? initialData.tax_year_end.split('T')[0] : new Date().toISOString().split('T')[0]);
-            setLegalName(initialData.legal_name || '');
-            setOperatingName(initialData.operating_name || '');
-            setBusinessType(initialData.business_type || '');
-            setIncorporationDate(initialData.incorporation_date ? initialData.incorporation_date.split('T')[0] : new Date().toISOString().split('T')[0]);
-            setEmployeeCount(initialData.employee_count || 0);
+            setType(initialData.type ?? 'FIRM');
+            setId(initialData.client_id ?? initialData.id ?? null);
+            setCompanyName(initialData.client_company_name ?? initialData.name ?? '');
+            setBusinessNumber(initialData.client_business_number ?? initialData.business_number ?? '');
+            setPayrollAccountNumber(initialData.payroll_account_number ?? '');
+            setProvince(initialData.province ?? 'ON');
+            setStreetAddress(initialData.client_address ?? initialData.street_address ?? '');
+            setCountry(initialData.country ?? 'Canada');
+            setPostalCode(initialData.postal_code ?? '');
+            setPhone(initialData.client_mainphone ?? initialData.phone ?? '');
+            setEmail(initialData.client_email ?? initialData.email ?? '');
+            setWsibNumber(initialData.wsib_number ?? '');
+            setEhtAccount(initialData.eht_account ?? '');
+            setRemittanceFrequency(initialData.remittance_frequency ?? 'monthly');
+            setTaxYearEnd(initialData.tax_year_end?.split('T')[0] ?? today);
+            setLegalName(initialData.client_contact_name ?? initialData.legal_name ?? '');
+            setOperatingName(initialData.client_contact_title ?? initialData.operating_name ?? '');
+            setBusinessType(initialData.business_type ?? '');
+            setIncorporationDate(initialData.incorporation_date?.split('T')[0] ?? today);
+            setEmployeeCount(initialData.employee_count ?? 0);
         } else {
             setType('FIRM');
-            setName('');
+            setId(null);
+            setCompanyName('');
             setBusinessNumber('');
             setPayrollAccountNumber('');
             setProvince('ON');
             setStreetAddress('');
-            setCountry('');
+            setCountry('Canada');
             setPostalCode('');
             setPhone('');
             setEmail('');
             setWsibNumber('');
             setEhtAccount('');
             setRemittanceFrequency('monthly');
-            setTaxYearEnd(new Date().toISOString().split('T')[0]);
+            setTaxYearEnd(today);
             setLegalName('');
             setOperatingName('');
             setBusinessType('');
-            setIncorporationDate(new Date().toISOString().split('T')[0]);
+            setIncorporationDate(today);
             setEmployeeCount(0);
         }
-    }, [initialData, isOpen]);
+    }, [initialData, isOpen, today]);
 
     const handleSubmit = async () => {
-        if (!name.trim()) {
-            setError('Name is required');
+        if (!companyName.trim()) {
+            setError('Company name is required');
             return;
         }
 
         setLoading(true);
         setError(null);
 
-        const basePayload: Omit<InterfaceBE, 'id'> = {
+        const basePayload: Partial<ClientDB> = {
             type,
-            name,
+            client_company_name: companyName,
+            name: companyName,
+            client_business_number: businessNumber,
             business_number: businessNumber,
             payroll_account_number: payrollAccountNumber,
+            client_address: streetAddress,
             province,
-            street_address: streetAddress,
             country,
+            street_address: streetAddress,
             postal_code: postalCode,
+            client_mainphone: phone,
             phone,
+            client_email: email,
             email,
             wsib_number: wsibNumber,
             eht_account: ehtAccount,
             remittance_frequency: remittanceFrequency,
             tax_year_end: taxYearEnd,
+            client_contact_name: legalName,
             legal_name: legalName,
+            client_contact_title: operatingName,
             operating_name: operatingName,
             business_type: businessType,
             incorporation_date: incorporationDate,
@@ -121,9 +131,13 @@ const BizEntityFormModal = ({ isOpen, onClose, onComplete, initialData }: Props)
         };
 
         try {
-            const entityId = initialData?.id ?? id ?? null;
+            const entityId = initialData?.client_id ?? initialData?.id ?? id ?? null;
             if (entityId) {
-                const updatePayload: InterfaceBE = { id: entityId, ...basePayload };
+                const updatePayload: Partial<ClientDB> = {
+                    id: entityId,
+                    client_id: entityId,
+                    ...basePayload,
+                };
                 await clientsAPI.updateClient(entityId, updatePayload);
             } else {
                 await clientsAPI.createClient(basePayload);
@@ -150,7 +164,7 @@ const BizEntityFormModal = ({ isOpen, onClose, onComplete, initialData }: Props)
 
                     <div className="flex items-center gap-3">
                         <Label htmlFor="name" className="w-32 text-sm">Name *</Label>
-                        <Input id="name" className="flex-1" value={name} onChange={(e) => setName(e.target.value)} />
+                        <Input id="name" className="flex-1" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                     </div>
                     <div className="flex items-center gap-3">
                         <Label htmlFor="legalName" className="w-32 text-sm">Legal Name</Label>
