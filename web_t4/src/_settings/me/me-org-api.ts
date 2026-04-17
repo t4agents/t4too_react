@@ -36,8 +36,8 @@ export const meOrgAPI = {
 
     
     async patchOrg(data: Partial<InterfaceBE>): Promise<InterfaceBE> {
-        const response = await apiFetch('/zme/patch_myorg', {
-            method: 'PATCH',
+        const response = await apiFetch('/settings/savebe', {
+            method: 'POST',
             body: JSON.stringify(data),
         });
 
@@ -54,7 +54,7 @@ export const meOrgAPI = {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await apiFetch('/zme/profile-picture', {
+        const response = await apiFetch('/settings/profile-picture', {
             method: 'POST',
             body: formData,
         });
