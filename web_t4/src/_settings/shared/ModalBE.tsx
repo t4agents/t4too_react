@@ -5,7 +5,7 @@ import { Input } from "src/components/ui/input";
 import { Button } from "src/components/ui/button";
 import LoadingSpinner from "src/components/shared/LoadingSpinner";
 import { dateOnly, type InterfaceBE } from "src/types/type_be";
-import type { PersonalState } from "src/types/type_me";
+import type { InterfaceUser } from "src/types/type_me";
 
 
 
@@ -13,8 +13,8 @@ type UserProfileModalProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     modalType: "personal" | "organization" | null;
-    tempPersonal: PersonalState;
-    setTempPersonal: React.Dispatch<React.SetStateAction<PersonalState>>;
+    tempPersonal: InterfaceUser;
+    setTempPersonal: React.Dispatch<React.SetStateAction<InterfaceUser>>;
     tempOrganization: InterfaceBE;
     setTempOrganization: React.Dispatch<React.SetStateAction<InterfaceBE>>;
     onSave: () => void | Promise<void>;
@@ -56,8 +56,8 @@ const UserProfileModal = ({
                             <Input
                                 id="firstName"
                                 placeholder="Your first name"
-                                value={tempPersonal.firstName}
-                                onChange={(e) => setTempPersonal({ ...tempPersonal, firstName: e.target.value })}
+                                value={text(tempPersonal.first_name)}
+                                onChange={(e) => setTempPersonal({ ...tempPersonal, first_name: e.target.value })}
                             />
                         </div>
                         <div className="flex items-center gap-3">
@@ -67,8 +67,8 @@ const UserProfileModal = ({
                             <Input
                                 id="lastName"
                                 placeholder="Your last name"
-                                value={tempPersonal.lastName}
-                                onChange={(e) => setTempPersonal({ ...tempPersonal, lastName: e.target.value })}
+                                value={text(tempPersonal.last_name)}
+                                onChange={(e) => setTempPersonal({ ...tempPersonal, last_name: e.target.value })}
                             />
                         </div>
                         <div className="flex items-center gap-3">
@@ -78,7 +78,7 @@ const UserProfileModal = ({
                             <Input
                                 id="email"
                                 placeholder="you@example.com"
-                                value={tempPersonal.email}
+                                value={text(tempPersonal.email)}
                                 readOnly
                             />
                         </div>
@@ -89,7 +89,7 @@ const UserProfileModal = ({
                             <Input
                                 id="country"
                                 placeholder="Your country"
-                                value={tempPersonal.country}
+                                value={text(tempPersonal.country)}
                                 onChange={(e) => setTempPersonal({ ...tempPersonal, country: e.target.value })}
                             />
                         </div>
@@ -100,7 +100,7 @@ const UserProfileModal = ({
                             <Input
                                 id="position"
                                 placeholder="Your position"
-                                value={tempPersonal.position}
+                                value={text(tempPersonal.position)}
                                 onChange={(e) => setTempPersonal({ ...tempPersonal, position: e.target.value })}
                             />
                         </div>
@@ -111,7 +111,7 @@ const UserProfileModal = ({
                             <Input
                                 id="facebook"
                                 placeholder="facebook.com/username"
-                                value={tempPersonal.facebook}
+                                value={text(tempPersonal.facebook)}
                                 onChange={(e) => setTempPersonal({ ...tempPersonal, facebook: e.target.value })}
                             />
                         </div>
@@ -122,7 +122,7 @@ const UserProfileModal = ({
                             <Input
                                 id="twitter"
                                 placeholder="x.com/username"
-                                value={tempPersonal.twitter}
+                                value={text(tempPersonal.twitter)}
                                 onChange={(e) => setTempPersonal({ ...tempPersonal, twitter: e.target.value })}
                             />
                         </div>
@@ -133,7 +133,7 @@ const UserProfileModal = ({
                             <Input
                                 id="github"
                                 placeholder="github.com/username"
-                                value={tempPersonal.github}
+                                value={text(tempPersonal.github)}
                                 onChange={(e) => setTempPersonal({ ...tempPersonal, github: e.target.value })}
                             />
                         </div>
@@ -144,7 +144,7 @@ const UserProfileModal = ({
                             <Input
                                 id="reddit"
                                 placeholder="reddit.com/username"
-                                value={tempPersonal.reddit}
+                                value={text(tempPersonal.reddit)}
                                 onChange={(e) => setTempPersonal({ ...tempPersonal, reddit: e.target.value })}
                             />
                         </div>
@@ -158,7 +158,7 @@ const UserProfileModal = ({
                             <Input
                                 id="country"
                                 placeholder="Country"
-                                value={tempPersonal.country}
+                                value={text(tempPersonal.country)}
                                 onChange={(e) => setTempPersonal({ ...tempPersonal, country: e.target.value })}
                             />
                         </div>
@@ -169,7 +169,7 @@ const UserProfileModal = ({
                             <Input
                                 id="state"
                                 placeholder="Province or State"
-                                value={tempPersonal.state}
+                                value={text(tempPersonal.state)}
                                 onChange={(e) => setTempPersonal({ ...tempPersonal, state: e.target.value })}
                             />
                         </div>
@@ -180,7 +180,7 @@ const UserProfileModal = ({
                             <Input
                                 id="pin"
                                 placeholder="Referral code"
-                                value={tempPersonal.pin}
+                                value={text(tempPersonal.pin)}
                                 onChange={(e) => setTempPersonal({ ...tempPersonal, pin: e.target.value })}
                             />
                         </div>
@@ -191,7 +191,7 @@ const UserProfileModal = ({
                             <Input
                                 id="zip"
                                 placeholder="A1A 1A1 or 12345"
-                                value={tempPersonal.zip}
+                                value={text(tempPersonal.zip)}
                                 onChange={(e) => setTempPersonal({ ...tempPersonal, zip: e.target.value })}
                             />
                         </div>
@@ -202,8 +202,8 @@ const UserProfileModal = ({
                             <Input
                                 id="taxNo"
                                 placeholder="Tax ID number"
-                                value={tempPersonal.taxNo}
-                                onChange={(e) => setTempPersonal({ ...tempPersonal, taxNo: e.target.value })}
+                                value={text(tempPersonal.tax_no)}
+                                onChange={(e) => setTempPersonal({ ...tempPersonal, tax_no: e.target.value })}
                             />
                         </div>
                     </div>

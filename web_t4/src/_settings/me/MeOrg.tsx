@@ -17,10 +17,8 @@ import { resizeImage } from "src/components/helper/image-utils";
 
 import type { InterfaceBE } from "src/types/type_be";
 import {
-    EMPTY_PERSONAL,
-    mapPersonalToUserPatch,
-    mapUserToPersonal,
-    type PersonalState,
+    EMPTY_ME,
+    type InterfaceUser,
 } from "src/types/type_me";
 
 const Skeleton = ({ className = "" }: { className?: string }) => (
@@ -47,8 +45,7 @@ const UserProfile = () => {
 
     const BCrumb = [{ to: "/", title: "Home", },{ title: "User Profile", },];
 
-    const [personal, setPersonal] = useState<PersonalState>(EMPTY_PERSONAL);
-
+    const [personal, setPersonal] = useState<InterfaceUser>(EMPTY_ME);
     const [organization, setOrganization] = useState<InterfaceBE>(EMPTY_BE);
 
     const [organizationId, setOrganizationId] = useState<string | null>(null);
@@ -60,9 +57,7 @@ const UserProfile = () => {
             setLoadingProfile(true);
             try {
                 const authAvatar = getUserAvatar(authUser);
-                if (authAvatar) {
-                    setCurrentProfileImg(authAvatar);
-                }
+                if (authAvatar) {setCurrentProfileImg(authAvatar);}
 
                 const [userResult, myOrgResult] = await Promise.allSettled([
                     meOrgAPI.getMe(),
@@ -73,24 +68,19 @@ const UserProfile = () => {
 
                 if (userResult.status === "fulfilled") {
                     const user = userResult.value;
-                    setPersonal(mapUserToPersonal(user));
+                    setPersonal(user);
                     setStoreNames([user.first_name, user.last_name].filter(Boolean).join(' '));
                     if (user.profile_picture && !authAvatar) {
                         setCurrentProfileImg(user.profile_picture);
                         setStoreAvatar(user.profile_picture);
                     }
-                } else {
-                    console.error('Failed to fetch user:', userResult.reason);
-                }
+                } else {console.error('Failed to fetch user:', userResult.reason);}
 
                 if (myOrgResult.status === "fulfilled") {
                     const myOrg = myOrgResult.value;
-                    console.log("Loaded organization (get_myorg):", myOrg);
                     setOrganizationId(myOrg.id);
                     setOrganization(myOrg);
-                } else {
-                    console.error('Failed to fetch organization:', myOrgResult.reason);
-                }
+                } else {console.error('Failed to fetch organization:', myOrgResult.reason);}
             } catch (error) {
                 console.error('Failed to fetch profile data:', error);
             } finally {
@@ -105,11 +95,7 @@ const UserProfile = () => {
         event.target.value = "";
 
         if (!file) return;
-
-        if (!authUser) {
-            notifyToast({ message: "Please sign in again to update profile image.", variant: "error" });
-            return;
-        }
+        if (!authUser) {return;}
 
         if (!file.type.startsWith("image/")) {
             notifyToast({ message: "Please select an image file.", variant: "error" });
@@ -160,27 +146,22 @@ const UserProfile = () => {
         } catch (error) {
             const message = error instanceof Error ? error.message : "Failed to upload profile image.";
             notifyToast({ message, variant: "error" });
-            console.error("Failed to upload profile image:", error);
         } finally {
             setUploadingAvatar(false);
         }
     };
 
     useEffect(() => {
-        if (openModal && modalType === "personal") {
-            setTempPersonal(personal);
-        }
-        if (openModal && modalType === "organization") {
-            setTempOrganization(organization);
-        }
+        if (openModal && modalType === "personal") {setTempPersonal(personal);}
+        if (openModal && modalType === "organization") {setTempOrganization(organization);}
     }, [openModal, modalType, personal, organization]);
 
     const handleSave = async () => {
         setIsSavingProfile(true);
         try {
             if (modalType === "personal") {
-                const updatedUser = await meOrgAPI.patchMe(mapPersonalToUserPatch(tempPersonal));
-                setPersonal(mapUserToPersonal(updatedUser));
+                const updatedUser = await meOrgAPI.patchMe(tempPersonal);
+                setPersonal(updatedUser);
                 setStoreNames([updatedUser.first_name, updatedUser.last_name].filter(Boolean).join(' '));
                 if (updatedUser.profile_picture) {
                     setCurrentProfileImg(updatedUser.profile_picture);
@@ -253,7 +234,7 @@ const UserProfile = () => {
                                 {loadingProfile ? (
                                     <Skeleton className="h-5 w-48" />
                                 ) : (
-                                    <h5 className="card-title">{personal.firstName || "Your"} {personal.lastName || "Name"}</h5>
+                                    <h5 className="card-title">{personal.first_name || "Your"} {personal.last_name || "Name"}</h5>
                                 )}
                                 <div className="flex flex-wrap items-center gap-1 md:gap-3">
                                     {loadingProfile ? (
@@ -303,15 +284,15 @@ const UserProfile = () => {
                                 </>
                             ) : (
                                 <>
-                                    <div><p className="text-xs text-gray-500">First Name</p><p>{personal.firstName || "Your first name"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Last Name</p><p>{personal.lastName || "Your last name"}</p></div>
+                                    <div><p className="text-xs text-gray-500">First Name</p><p>{personal.first_name || "Your first name"}</p></div>
+                                    <div><p className="text-xs text-gray-500">Last Name</p><p>{personal.last_name || "Your last name"}</p></div>
                                     <div><p className="text-xs text-gray-500">Email</p><p>{personal.email || "you@example.com"}</p></div>
                                     <div><p className="text-xs text-gray-500">Phone</p><p>{personal.phone || "+1 (555) 123-4567"}</p></div>
                                     <div><p className="text-xs text-gray-500">Position</p><p>{personal.position || "Your position"}</p></div>
                                     <div><p className="text-xs text-gray-500">country</p><p>{personal.country || "Country"}</p></div>
                                     <div><p className="text-xs text-gray-500">Province / State</p><p>{personal.state || "Province or State"}</p></div>
                                     <div><p className="text-xs text-gray-500">Postal Code / ZIP</p><p>{personal.zip || "A1A 1A1 or 12345"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Tax ID No.</p><p>{personal.taxNo || "Tax ID number"}</p></div>
+                                    <div><p className="text-xs text-gray-500">Tax ID No.</p><p>{personal.tax_no || "Tax ID number"}</p></div>
                                     <div><p className="text-xs text-gray-500">Note</p><p>{personal.note || "Add a note"}</p></div>
                                 </>
                             )}
