@@ -34,7 +34,7 @@ const MarketingHome = Loadable(lazy(() => import('src/_marketing/MarketingHome')
 const Modern = Loadable(lazy(() => import('src/_overview/Modern')));
 
 /* =========================Pages========================= */
-const UserProfile = Loadable(lazy(() => import('src/_settings/me/MeOrg')));
+const UserProfile = Loadable(lazy(() => import('src/_settings/me/Me')));
 const Clients = Loadable(lazy(() => import('src/_settings/clients/Clients')));
 const BillingSubscription = Loadable(lazy(() => import('src/_settings/billing/BillingSubscription')));
 const BillingSuccess = Loadable(lazy(() => import('src/_settings/billing/BillingSuccess')));

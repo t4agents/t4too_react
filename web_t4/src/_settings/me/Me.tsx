@@ -4,15 +4,19 @@ import { Icon } from "@iconify/react/dist/iconify.js"
 import BreadcrumbComp from "src/_layouts/shared/breadcrumb/BreadcrumbComp";
 import CardBox from "src/components/shared/CardBox";
 import profileImg from "src/assets/images/profile/user-1.jpg"
-import { Button } from "src/components/ui/button";
 import { meOrgAPI } from "src/_settings/me/me-org-api";
-import UserProfileModal from "./MeOrgModal";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "src/components/ui/dialog";
+import { Button } from "src/components/ui/button";
+import MeModal from "./MeModal";
+import OrgModal from "./OrgModal";
+import MeCard from "./MeCard";
+import Org from "./Org";
 import { getUserAvatar, supabase } from "src/core/supabase";
 import { notifyToast } from "src/core/toast";
 import { useUserProfileStore } from "src/store/user-profile-store";
 import LoadingSpinner from "src/components/shared/LoadingSpinner";
 import { useAuthStore } from "src/store/auth-store";
-import {EMPTY_BE,dateOnly} from "src/types/type_be";
+import { EMPTY_BE } from "src/types/type_be";
 import { resizeImage } from "src/components/helper/image-utils";
 
 import type { InterfaceBE } from "src/types/type_be";
@@ -266,108 +270,58 @@ const UserProfile = () => {
                 </CardBox>
 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    <CardBox className="p-6 overflow-hidden">
-                        <h5 className="card-title mb-6">Personal Information</h5>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-7 2xl:gap-x-32 mb-6">
-                            {loadingProfile ? (
-                                <>
-                                    <div><p className="text-xs text-gray-500">First Name</p><Skeleton className="mt-2 h-4 w-40" /></div>
-                                    <div><p className="text-xs text-gray-500">Last Name</p><Skeleton className="mt-2 h-4 w-40" /></div>
-                                    <div><p className="text-xs text-gray-500">Email</p><Skeleton className="mt-2 h-4 w-48" /></div>
-                                    <div><p className="text-xs text-gray-500">Phone</p><Skeleton className="mt-2 h-4 w-36" /></div>
-                                    <div><p className="text-xs text-gray-500">Position</p><Skeleton className="mt-2 h-4 w-40" /></div>
-                                    <div><p className="text-xs text-gray-500">country</p><Skeleton className="mt-2 h-4 w-40" /></div>
-                                    <div><p className="text-xs text-gray-500">Province / State</p><Skeleton className="mt-2 h-4 w-40" /></div>
-                                    <div><p className="text-xs text-gray-500">PIN Code</p><Skeleton className="mt-2 h-4 w-32" /></div>
-                                    <div><p className="text-xs text-gray-500">Postal Code / ZIP</p><Skeleton className="mt-2 h-4 w-44" /></div>
-                                    <div><p className="text-xs text-gray-500">Tax No.</p><Skeleton className="mt-2 h-4 w-40" /></div>
-                                </>
-                            ) : (
-                                <>
-                                    <div><p className="text-xs text-gray-500">First Name</p><p>{personal.first_name || "Your first name"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Last Name</p><p>{personal.last_name || "Your last name"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Email</p><p>{personal.email || "you@example.com"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Phone</p><p>{personal.phone || "+1 (555) 123-4567"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Position</p><p>{personal.position || "Your position"}</p></div>
-                                    <div><p className="text-xs text-gray-500">country</p><p>{personal.country || "Country"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Province / State</p><p>{personal.state || "Province or State"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Postal Code / ZIP</p><p>{personal.zip || "A1A 1A1 or 12345"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Tax ID No.</p><p>{personal.tax_no || "Tax ID number"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Note</p><p>{personal.note || "Add a note"}</p></div>
-                                </>
-                            )}
-                        </div>
-                        <div className="flex justify-end">
-                            <Button onClick={() => { setModalType("personal"); setOpenModal(true); }} color={"primary"} className="flex items-center gap-1.5 rounded-md" disabled={loadingProfile}>
-                                <Icon icon="ic:outline-edit" width="18" height="18" /> Edit
-                            </Button>
-                        </div>
-                    </CardBox>
-
-                    <CardBox className="p-6 overflow-hidden">
-                        <h5 className="card-title mb-6">My Organization</h5>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-7 2xl:gap-x-32 mb-6">
-                            {loadingProfile ? (
-                                <>
-                                    <div><p className="text-xs text-gray-500">Legal Name</p><Skeleton className="mt-2 h-4 w-48" /></div>
-                                    <div><p className="text-xs text-gray-500">Business Type</p><Skeleton className="mt-2 h-4 w-40" /></div>
-                                    <div><p className="text-xs text-gray-500">Business Number (BN)</p><Skeleton className="mt-2 h-4 w-44" /></div>
-                                    <div><p className="text-xs text-gray-500">Payroll Account No.</p><Skeleton className="mt-2 h-4 w-44" /></div>
-                                    <div><p className="text-xs text-gray-500">Remittance Frequency</p><Skeleton className="mt-2 h-4 w-36" /></div>
-                                    <div><p className="text-xs text-gray-500">Tax Year End</p><Skeleton className="mt-2 h-4 w-32" /></div>
-                                    <div>
-                                        <p className="text-xs text-gray-500">Address</p>
-                                        <Skeleton className="mt-2 h-4 w-60" />
-                                    </div>
-                                    <div><p className="text-xs text-gray-500">Phone</p><Skeleton className="mt-2 h-4 w-36" /></div>
-                                    <div><p className="text-xs text-gray-500">Country</p><Skeleton className="mt-2 h-4 w-32" /></div>
-                                    <div><p className="text-xs text-gray-500">Employee Count</p><Skeleton className="mt-2 h-4 w-36" /></div>
-                                </>
-                            ) : (
-                                <>
-                                    <div><p className="text-xs text-gray-500">Operating Name</p><p>{organization.operating_name || "Org name"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Business Type</p><p>{organization.business_type || "Corporation, partnership, etc."}</p></div>
-                                    <div><p className="text-xs text-gray-500">Business Number (BN)</p><p>{organization.business_number || "123456789"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Payroll Account No.</p><p>{organization.payroll_account_number || "123456789RP0001"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Remittance Frequency</p><p>{organization.remittance_frequency || "Monthly"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Tax Year End</p><p>{dateOnly(organization.tax_year_end) || "YYYY-MM-DD"}</p></div>
-                                    <div>
-                                        <p className="text-xs text-gray-500">Address</p>
-                                        <p>
-                                            {[
-                                                organization.street_address || "Street address",
-                                                organization.city || "City",
-                                                organization.province || "Province or State",
-                                                organization.postal_code || "A1A 1A1 or 12345",
-                                            ].join(", ")}
-                                        </p>
-                                    </div>
-                                    <div><p className="text-xs text-gray-500">Phone</p><p>{organization.phone || "+1 (555) 123-4567"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Country</p><p>{organization.country || "Canada"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Employee Count</p><p>{organization.employee_count ?? "Number of employees"}</p></div>
-                                </>
-                            )}
-                        </div>
-                        <div className="flex justify-end">
-                            <Button onClick={() => { setModalType("organization"); setOpenModal(true); }} color={"primary"} className="flex items-center gap-1.5 rounded-md" disabled={loadingProfile}>
-                                <Icon icon="ic:outline-edit" width="18" height="18" /> Edit
-                            </Button>
-                        </div>
-                    </CardBox>
+                    <MeCard
+                        loadingProfile={loadingProfile}
+                        personal={personal}
+                        onEdit={() => { setModalType("personal"); setOpenModal(true); }}
+                    />
+                    <Org
+                        loadingProfile={loadingProfile}
+                        organization={organization}
+                        onEdit={() => { setModalType("organization"); setOpenModal(true); }}
+                    />
                 </div>
             </div>
 
-            <UserProfileModal
-                open={openModal}
-                onOpenChange={setOpenModal}
-                modalType={modalType}
-                tempPersonal={tempPersonal}
-                setTempPersonal={setTempPersonal}
-                tempOrganization={tempOrganization}
-                setTempOrganization={setTempOrganization}
-                onSave={handleSave}
-                isSaving={isSavingProfile}
-            />
+            {(modalType === "personal" || modalType === "organization") && (
+                <Dialog open={openModal} onOpenChange={setOpenModal}>
+                    <DialogContent className="max-w-4xl">
+                        <DialogHeader>
+                            <DialogTitle className="mb-4">
+                                {modalType === "personal" ? "Edit Personal Information" : "Edit Organization"}
+                            </DialogTitle>
+                        </DialogHeader>
+
+                        {modalType === "personal" ? (
+                            <MeModal tempPersonal={tempPersonal} setTempPersonal={setTempPersonal} />
+                        ) : (
+                            <OrgModal tempOrganization={tempOrganization} setTempOrganization={setTempOrganization} />
+                        )}
+
+                        {isSavingProfile && (
+                            <div className="mt-2 rounded-md border border-border bg-muted/40 p-3">
+                                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                                    <LoadingSpinner size="md" />
+                                </div>
+                            </div>
+                        )}
+
+                        <DialogFooter className="flex gap-2 mt-4">
+                            <Button color={"primary"} className="rounded-md" onClick={handleSave} disabled={isSavingProfile}>
+                                Save Changes
+                            </Button>
+                            <Button
+                                color={"lighterror"}
+                                className="rounded-md bg-lighterror dark:bg-darkerror text-error hover:bg-error hover:text-white"
+                                onClick={() => setOpenModal(false)}
+                                disabled={isSavingProfile}
+                            >
+                                Close
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            )}
         </>
     );
 };
