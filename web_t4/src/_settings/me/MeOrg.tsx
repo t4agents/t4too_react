@@ -102,7 +102,7 @@ const UserProfile = () => {
         tax_year_end: "", wsib_number: "", eht_account: "", street_address: "", city: "",
         province: "", country: "", postal_code: "", phone: "", email: ""
     });
-    
+
     const [organizationId, setOrganizationId] = useState<string | null>(null);
     const [tempPersonal, setTempPersonal] = useState(personal);
     const [tempOrganization, setTempOrganization] = useState(organization);
@@ -121,7 +121,7 @@ const UserProfile = () => {
                     meOrgAPI.getMyOrg(),
                     // clientsAPI.getCurrentOrg(auth.currentUser?.uid || ""),
                 ]);
-                
+
 
                 if (userResult.status === "fulfilled") {
                     const user = userResult.value;
