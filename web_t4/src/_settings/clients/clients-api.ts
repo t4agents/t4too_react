@@ -90,8 +90,8 @@ export const clientsAPI = {
             id: data.id ?? id,
             client_id: data.client_id ?? id,
         };
-        const response = await apiFetch(`/be/edit`, {
-            method: 'PATCH',
+        const response = await apiFetch(`/settings/post_client`, {
+            method: 'POST',
             body: JSON.stringify(payload),
         });
 

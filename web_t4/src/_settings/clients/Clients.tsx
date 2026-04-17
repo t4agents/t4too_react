@@ -14,6 +14,10 @@ import { Input } from 'src/components/ui/input';
 
 import BreadcrumbComp from 'src/_layouts/shared/breadcrumb/BreadcrumbComp';
 import { useClientStore } from 'src/store/client-store';
+import { useUserProfileStore } from 'src/store/user-profile-store';
+import { useAuthStore } from 'src/store/auth-store';
+import { supabase } from 'src/core/supabase';
+import { notifyToast } from 'src/core/toast';
 
 import { clientsAPI } from './clients-api';
 import BizEntityFormModal from './BizEntityFormModal';
@@ -26,6 +30,20 @@ const BCrumb = [
 
 const pageSize = 20;
 
+const getErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+        return error.message;
+    }
+    if (typeof error === 'string') {
+        return error;
+    }
+    try {
+        return JSON.stringify(error);
+    } catch {
+        return 'Unknown error';
+    }
+};
+
 const Clients = () => {
     const [clients, setClients] = useState<ClientDB[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -33,6 +51,9 @@ const Clients = () => {
     const [query, setQuery] = useState('');
     const [pageIndex, setPageIndex] = useState(0);
     const setStoreClients = useClientStore((state) => state.setClients);
+    const setFBClientName = useUserProfileStore((state) => state.setFBClientName);
+    const fbClientName = useUserProfileStore((state) => state.fbClientName);
+    const authUser = useAuthStore((state) => state.user);
     const activeBE = useClientStore((state) => state.activeBE);
     const setActiveBE = useClientStore((state) => state.setActiveBE);
     const activeClientId = activeBE?.active_zbid ?? null;
@@ -53,18 +74,49 @@ const Clients = () => {
                     }))
                     .filter((client) => client.id),
             );
+
+            const { data: userData } = await supabase.auth.getUser();
+            const latestMetadata = (userData.user?.user_metadata ?? {}) as Record<string, unknown>;
+            const authMetadata = (authUser?.user_metadata ?? {}) as Record<string, unknown>;
+            const jwtClientId =
+                (typeof latestMetadata.sbu_client_id === 'string' && latestMetadata.sbu_client_id
+                    ? latestMetadata.sbu_client_id
+                    : null) ??
+                (typeof authMetadata.sbu_client_id === 'string' && authMetadata.sbu_client_id
+                    ? authMetadata.sbu_client_id
+                    : null);
+            const jwtClientName =
+                (typeof latestMetadata.sbu_client_name === 'string' && latestMetadata.sbu_client_name
+                    ? latestMetadata.sbu_client_name
+                    : null) ??
+                (typeof authMetadata.sbu_client_name === 'string' && authMetadata.sbu_client_name
+                    ? authMetadata.sbu_client_name
+                    : null);
+
             const nextActiveClient =
-                nextClients.find((client) => getClientId(client) === data.activeClientId) ?? null;
+                (jwtClientId
+                    ? nextClients.find((client) => getClientId(client) === jwtClientId)
+                    : null) ??
+                nextClients.find((client) => getClientId(client) === data.activeClientId) ??
+                null;
 
             if (nextActiveClient) {
+                const nextClientId = getClientId(nextActiveClient);
+                const nextClientName = getClientDisplayName(nextActiveClient) || nextClientId;
                 setActiveBE({
-                    active_zbid: getClientId(nextActiveClient),
-                    name: getClientDisplayName(nextActiveClient) || getClientId(nextActiveClient),
+                    active_zbid: nextClientId,
+                    name: nextClientName,
                 });
+                setFBClientName(
+                    jwtClientId === nextClientId && jwtClientName
+                        ? jwtClientName
+                        : nextClientName,
+                );
                 return;
             }
 
             setActiveBE(null);
+            setFBClientName('');
         } finally {
             setIsLoading(false);
         }
@@ -73,28 +125,53 @@ const Clients = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingClient, setEditingClient] = useState<ClientDB | null>(null);
 
-    const handleCheckboxChange = async (clientId: string) => {
-        const nextBizId = activeClientId === clientId ? null : clientId;
-        if (!nextBizId) {
-            setActiveBE(null);
-            return;
+    const syncUserClientMetadata = async (clientId: string, clientName: string) => {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+            throw sessionError;
         }
-        if (isSwitchingActive || nextBizId === activeClientId) {
+        if (!sessionData.session) {
+            throw new Error('No active auth session.');
+        }
+
+        const { data, error } = await supabase.auth.getUser();
+        if (error) {
+            throw error;
+        }
+        const { error: updateError } = await supabase.auth.updateUser({
+            data: {
+                sbu_client_id: clientId,
+                sbu_client_name: clientName,
+            },
+        });
+        if (updateError) {
+            throw updateError;
+        }
+    };
+
+    const handleCheckboxChange = async (clientId: string) => {
+        if (isSwitchingActive || clientId === activeClientId) {
             return;
         }
 
         const previousActiveBE = activeBE;
-        const selected = clients.find((client) => getClientId(client) === nextBizId);
+        const previousClientName = fbClientName;
+        const selected = clients.find((client) => getClientId(client) === clientId);
+        const selectedClientName = selected ? getClientDisplayName(selected) || clientId : clientId;
         setActiveBE({
-            active_zbid: nextBizId,
-            name: selected ? getClientDisplayName(selected) || nextBizId : nextBizId,
+            active_zbid: clientId,
+            name: selectedClientName,
         });
+        setFBClientName(selectedClientName);
         setIsSwitchingActive(true);
         try {
-            await clientsAPI.changeActiveBid(nextBizId);
+            await syncUserClientMetadata(clientId, selectedClientName);
         } catch (err) {
             setActiveBE(previousActiveBE);
-            console.error('Failed to update active client:', err);
+            setFBClientName(previousClientName);
+            const message = getErrorMessage(err);
+            notifyToast({ message: `Failed to save selected client: ${message}`, variant: 'error' });
+            console.error('Failed to persist client selection metadata:', err);
         } finally {
             setIsSwitchingActive(false);
         }
