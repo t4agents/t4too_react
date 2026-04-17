@@ -93,7 +93,7 @@ const UserProfile = () => {
 
     const [personal, setPersonal] = useState({
         firstName: "", lastName: "", email: "", phone: "", position: "", facebook: "", twitter: "",
-        github: "", reddit: "", country: "", state: "", pin: "", zip: "", taxNo: ""
+        github: "", reddit: "", country: "", state: "", pin: "", zip: "", taxNo: "", note: ""
     });
 
     const [organization, setOrganization] = useState({
@@ -139,6 +139,7 @@ const UserProfile = () => {
                         state: user.state || "",
                         pin: user.pin || "",
                         zip: user.zip || "",
+                        note: user.note || "",
                         taxNo: user.tax_no || ""
                     });
                     setStoreNames([user.first_name, user.last_name].filter(Boolean).join(' '));
@@ -281,6 +282,7 @@ const UserProfile = () => {
                     state: tempPersonal.state,
                     pin: tempPersonal.pin,
                     zip: tempPersonal.zip,
+                    note: tempPersonal.note,
                     tax_no: tempPersonal.taxNo
                 });
                 setPersonal({
@@ -297,8 +299,8 @@ const UserProfile = () => {
                     state: updatedUser.state || "",
                     pin: updatedUser.pin || "",
                     zip: updatedUser.zip || "",
-                    taxNo: updatedUser.tax_no || ""
-
+                    taxNo: updatedUser.tax_no || "",
+                    note: updatedUser.note || ""
                 });
                 setStoreNames([updatedUser.first_name, updatedUser.last_name].filter(Boolean).join(' '));
                 if (updatedUser.profile_picture) {
@@ -471,9 +473,9 @@ const UserProfile = () => {
                                     <div><p className="text-xs text-gray-500">Position</p><p>{personal.position || "Your position"}</p></div>
                                     <div><p className="text-xs text-gray-500">country</p><p>{personal.country || "Country"}</p></div>
                                     <div><p className="text-xs text-gray-500">Province / State</p><p>{personal.state || "Province or State"}</p></div>
-                                    <div><p className="text-xs text-gray-500">Referral Code</p><p>{personal.pin || "Referral code"}</p></div>
                                     <div><p className="text-xs text-gray-500">Postal Code / ZIP</p><p>{personal.zip || "A1A 1A1 or 12345"}</p></div>
                                     <div><p className="text-xs text-gray-500">Tax ID No.</p><p>{personal.taxNo || "Tax ID number"}</p></div>
+                                    <div><p className="text-xs text-gray-500">Note</p><p>{personal.note || "Add a note"}</p></div>
                                 </>
                             )}
                         </div>

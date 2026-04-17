@@ -24,4 +24,5 @@ export interface InterfaceUser {
     tax_no?: string;
     created_at?: string;
     updated_at?: string;
+    note?: string;
 }

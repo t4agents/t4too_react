@@ -170,17 +170,6 @@ const UserProfileModal = ({
                             />
                         </div>
                         <div className="flex items-center gap-3">
-                            <Label htmlFor="pin" className="w-32 text-sm text-gray-600">
-                                Referral Code 
-                            </Label>
-                            <Input
-                                id="pin"
-                                placeholder="Referral code"
-                                value={tempPersonal.pin}
-                                onChange={(e) => setTempPersonal({ ...tempPersonal, pin: e.target.value })}
-                            />
-                        </div>
-                        <div className="flex items-center gap-3">
                             <Label htmlFor="zip" className="w-40 text-sm text-gray-600 whitespace-nowrap">
                                 Postal Code / ZIP
                             </Label>
@@ -200,6 +189,17 @@ const UserProfileModal = ({
                                 placeholder="Tax ID number"
                                 value={tempPersonal.taxNo}
                                 onChange={(e) => setTempPersonal({ ...tempPersonal, taxNo: e.target.value })}
+                            />
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <Label htmlFor="pin" className="w-32 text-sm text-gray-600">
+                                Note
+                            </Label>
+                            <Input
+                                id="note"
+                                placeholder="Add a note"
+                                value={tempPersonal.note}
+                                onChange={(e) => setTempPersonal({ ...tempPersonal, note: e.target.value })}
                             />
                         </div>
                     </div>

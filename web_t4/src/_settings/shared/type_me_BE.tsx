@@ -37,4 +37,5 @@ export type PersonalState = {
     pin: string;
     zip: string;
     taxNo: string;
+    note: string;
 };

@@ -5,7 +5,7 @@ import { InterfaceUser } from 'src/types/type_user';
 
 export const meOrgAPI = {
     async getMe(): Promise<InterfaceUser> {
-        const response = await apiFetch('/zme/get_me', {method: 'GET',});
+        const response = await apiFetch('/settings/userprofile', {method: 'GET',});
         if (!response.ok) {throw new Error(`Failed to fetch organization: ${response.statusText}`);}
         return response.json();
     },
@@ -20,8 +20,9 @@ export const meOrgAPI = {
     
     
     async patchMe(data: Partial<InterfaceUser>): Promise<InterfaceUser> {
-        const response = await apiFetch('/zme/patch_me', {
-            method: 'PATCH',
+        
+        const response = await apiFetch('/settings/saveme', {
+            method: 'POST',
             body: JSON.stringify(data),
         });
 
