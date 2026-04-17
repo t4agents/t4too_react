@@ -76,7 +76,7 @@ export const clientsAPI = {
 
     // 获取客户列表
     async listClients() {
-        const response = await apiFetch('/settings/get_client_list');
+        const response = await apiFetch('/too/get_client_list');
         if (!response.ok) {throw new Error(`Failed to fetch clients: ${response.statusText}`);}
         const data = await response.json();
         return normalizeClientsPayload(data);
@@ -90,7 +90,7 @@ export const clientsAPI = {
             id: data.id ?? id,
             client_id: data.client_id ?? id,
         };
-        const response = await apiFetch(`/settings/post_client`, {
+        const response = await apiFetch('/too/post_client', {
             method: 'POST',
             body: JSON.stringify(payload),
         });
@@ -107,29 +107,13 @@ export const clientsAPI = {
     // 删除客户（软删除）
     async softDeleteClient(id: string) {
         // Call DELETE endpoint which sets is_deleted = true on backend
-        const response = await apiFetch(`/be/deletebyid/${id}`, {
-            method: 'DELETE',
+        const response = await apiFetch(`/too/post_client/${id}`, {
+            method: 'POST',
         });
 
         if (!response.ok) {
             const text = await response.text();
             throw new Error(`Failed to delete client: ${response.status} ${text}`);
-        }
-
-        return response.json();
-    },
-
-
-    async changeActiveBid(rzbid: string) {
-        console.log('Changing active bid to:', rzbid);
-        const response = await apiFetch('/zme/change_active_bid', {
-            method: 'PATCH',
-            body: JSON.stringify({ rzbid }),
-        });
-
-        if (!response.ok) {
-            const text = await response.text();
-            throw new Error(`Failed to patch zbid: ${response.status} ${text}`);
         }
 
         return response.json();
