@@ -134,10 +134,6 @@ const Clients = () => {
             throw new Error('No active auth session.');
         }
 
-        const { data, error } = await supabase.auth.getUser();
-        if (error) {
-            throw error;
-        }
         const { error: updateError } = await supabase.auth.updateUser({
             data: {
                 sbu_client_id: clientId,
@@ -146,6 +142,12 @@ const Clients = () => {
         });
         if (updateError) {
             throw updateError;
+        }
+
+        // Force a fresh JWT so RLS claims reflect the selected client.
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+            throw refreshError;
         }
     };
 
@@ -236,6 +238,16 @@ const Clients = () => {
 
     return (
         <>
+            {isSwitchingActive && (
+                <div className="fixed inset-0 z-[70] bg-black/30 backdrop-blur-[1px] flex items-center justify-center">
+                    <div className="rounded-md bg-background border border-border px-4 py-3 shadow-lg">
+                        <div className="inline-flex items-center gap-3 text-sm font-medium">
+                            <LoadingSpinner size="md" />
+                            <span>Switching active client...</span>
+                        </div>
+                    </div>
+                </div>
+            )}
             <BreadcrumbComp
                 title="Clients"
                 items={BCrumb}
