@@ -14,6 +14,7 @@ export interface PayrollHistoryResponse {
     employee_id?: string;
     period_start?: string;
     period_end?: string;
+    pay_date?: string | null;
     pay_day?: string | null;
     total_gross?: number | string | null;
     payroll_cost?: number | string | null;

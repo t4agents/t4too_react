@@ -124,12 +124,22 @@ const PayrollContent = ({ activeBizId }: { activeBizId: string | null }) => {
     const [isEmployeePickerOpen, setIsEmployeePickerOpen] = useState(false);
     const [isAddingEmployees, setIsAddingEmployees] = useState(false);
     const navigate = useNavigate();
+    const logPayrollEntry = (message: string, payload?: Record<string, unknown>) => {
+        const ts = new Date().toISOString();
+        if (payload) {
+            console.log(`[PayrollEntry][${ts}] ${message}`, payload);
+            return;
+        }
+        console.log(`[PayrollEntry][${ts}] ${message}`);
+    };
 
     const fetchScheduleAndEntries = useCallback(async () => {
+        logPayrollEntry('fetchScheduleAndEntries:start', { activeBizId });
         if (!activeBizId) {
             setActiveSchedule(null);
             setEntries([]);
             setIsLoading(false);
+            logPayrollEntry('fetchScheduleAndEntries:skip_no_activeBizId');
             return;
         }
 
@@ -141,20 +151,47 @@ const PayrollContent = ({ activeBizId }: { activeBizId: string | null }) => {
                 entryAPI.listPayrollEntries({ skip: 0, limit: 500 }),
             ]);
             const active = schedules.find((schedule) => schedule.status === 'active') ?? null;
+            logPayrollEntry('fetchScheduleAndEntries:resolved', {
+                scheduleCount: schedules.length,
+                entryCount: entryData.length,
+                hasActiveSchedule: Boolean(active),
+                activeScheduleId: active?.id ?? null,
+            });
             setActiveSchedule(active);
             setEntries(active ? entryData : []);
+            if (!active) {
+                logPayrollEntry('no_active_schedule_ui_will_show', {
+                    reason: 'no schedule with status=active',
+                    scheduleCount: schedules.length,
+                    entryCountIgnoredBecauseNoActive: entryData.length,
+                });
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to fetch payroll data');
             setActiveSchedule(null);
             setEntries([]);
+            logPayrollEntry('fetchScheduleAndEntries:error', {
+                error: err instanceof Error ? err.message : String(err),
+            });
         } finally {
             setIsLoading(false);
+            logPayrollEntry('fetchScheduleAndEntries:end');
         }
     }, [activeBizId]);
 
     useEffect(() => {
         fetchScheduleAndEntries();
     }, [fetchScheduleAndEntries]);
+
+    useEffect(() => {
+        if (isLoading || activeSchedule) return;
+        logPayrollEntry('no_active_schedule_ui_rendered', {
+            activeBizId,
+            hasError: Boolean(error),
+            error: error ?? null,
+            entriesLength: entries.length,
+        });
+    }, [activeBizId, activeSchedule, entries.length, error, isLoading]);
 
     const totals = useMemo(() => {
         return entries.reduce(

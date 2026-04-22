@@ -87,7 +87,14 @@ const toPeriodTokenFromDate = (value?: string | null) => {
 const resolvePaystubFilename = (item: PayrollHistoryResponse, summary?: PayrollHistoryResponse | null) => {
     const name = toFileNamePart(item.full_name);
     const periodToken =
-        toPeriodTokenFromDate(item.pay_day ?? summary?.pay_day ?? item.period_end ?? item.period_start) ??
+        toPeriodTokenFromDate(
+            item.pay_date ??
+                item.pay_day ??
+                summary?.pay_date ??
+                summary?.pay_day ??
+                item.period_end ??
+                item.period_start,
+        ) ??
         String(item.period_key ?? summary?.period_key ?? 'paystub');
     return `paystub-${name}-${periodToken}.pdf`;
 };
@@ -212,7 +219,7 @@ const createPaystubPdfBlob = (
     ];
     const rightInfo: Array<[string, string]> = [
         ['Pay Period', resolvePeriodLabel(base, summary)],
-        ['Pay Date', toDateDisplay(base.pay_day ?? summary?.pay_day)],
+        ['Pay Date', toDateDisplay(base.pay_date ?? base.pay_day ?? summary?.pay_date ?? summary?.pay_day)],
         ['Pay Frequency', String((base as { pay_frequency?: string }).pay_frequency ?? '-')],
         ['Department', String((base as { department?: string }).department ?? '-')],
     ];

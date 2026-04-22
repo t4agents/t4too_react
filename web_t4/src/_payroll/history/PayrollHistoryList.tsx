@@ -7,12 +7,26 @@ import { Button } from 'src/components/ui/button';
 import { Card, CardContent } from 'src/components/ui/card';
 import { Table, TBody, TCell, THead, THeader, TRow } from 'src/components/ui/table';
 import LoadingSpinner from 'src/components/shared/LoadingSpinner';
-import { formatDate, formatMoney } from 'src/core/format';
+import { formatDate, formatMoney, toNumber } from 'src/core/format';
 
 const BCrumb = [
     { to: '/', title: 'Home' },
     { title: 'Payroll' },
 ];
+
+const getHistoryGroupKey = (item: PayrollHistoryResponse, index: number) =>
+    String(
+        item.history_id ??
+            item.period_key ??
+            item.id ??
+            `${item.pay_date ?? item.pay_day ?? 'no-day'}-${item.period_start ?? 'no-start'}-${index}`,
+    );
+
+const isExcludedRow = (item: PayrollHistoryResponse) =>
+    item.excluded === true ||
+    item.excluded === 'Yes' ||
+    item.excluded === 'true' ||
+    item.excluded === 'Excluded';
 
 const PayrollHistoryList = () => {
     const [history, setHistory] = useState<PayrollHistoryResponse[]>([]);
@@ -53,15 +67,76 @@ const PayrollHistoryList = () => {
         };
     }, []);
 
+    const normalizedHistory = useMemo(() => {
+        const groups = new Map<string, PayrollHistoryResponse[]>();
+        history.forEach((item, index) => {
+            const key = getHistoryGroupKey(item, index);
+            const existing = groups.get(key);
+            if (existing) {
+                existing.push(item);
+                return;
+            }
+            groups.set(key, [item]);
+        });
+
+        return Array.from(groups.values()).map((rows) => {
+            const representative =
+                rows.find((row) => row.employee_id === null || row.employee_id === undefined) ??
+                rows[0];
+            const nonExcludedRows = rows.filter((row) => !isExcludedRow(row));
+
+            const sumGross = nonExcludedRows.reduce((acc, row) => acc + toNumber(row.gross), 0);
+            const sumDeduction = nonExcludedRows.reduce(
+                (acc, row) => acc + toNumber(row.total_deduction),
+                0,
+            );
+            const sumNet = nonExcludedRows.reduce((acc, row) => acc + toNumber(row.net), 0);
+
+            const uniqueEmployeeIds = new Set(
+                nonExcludedRows
+                    .map((row) => row.employee_id ?? null)
+                    .filter((id): id is string => typeof id === 'string' && Boolean(id.trim())),
+            );
+            const excludedCountComputed = rows.filter((row) => isExcludedRow(row)).length;
+
+            return {
+                ...representative,
+                total_gross:
+                    sumGross !== 0
+                        ? sumGross
+                        : toNumber(representative.total_gross ?? representative.gross),
+                taxes_and_deductions:
+                    sumDeduction !== 0
+                        ? sumDeduction
+                        : toNumber(
+                              representative.taxes_and_deductions ??
+                                  representative.total_deduction,
+                          ),
+                total_net:
+                    sumNet !== 0
+                        ? sumNet
+                        : toNumber(representative.total_net ?? representative.net),
+                employee_count:
+                    uniqueEmployeeIds.size > 0
+                        ? uniqueEmployeeIds.size
+                        : toNumber(representative.employee_count),
+                excluded_count:
+                    excludedCountComputed > 0
+                        ? excludedCountComputed
+                        : toNumber(representative.excluded_count),
+            } as PayrollHistoryResponse;
+        });
+    }, [history]);
+
     useEffect(() => {
         setPageIndex(0);
-    }, [history.length]);
+    }, [normalizedHistory.length]);
 
     const pageSize = 20;
-    const pageCount = Math.max(1, Math.ceil(history.length / pageSize));
+    const pageCount = Math.max(1, Math.ceil(normalizedHistory.length / pageSize));
     const pageData = useMemo(
-        () => history.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize),
-        [history, pageIndex],
+        () => normalizedHistory.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize),
+        [normalizedHistory, pageIndex],
     );
     const canPrev = pageIndex > 0;
     const canNext = pageIndex + 1 < pageCount;
@@ -106,7 +181,7 @@ const PayrollHistoryList = () => {
                             <div className="p-4 flex items-center justify-center gap-2 text-gray-500">
                                 <LoadingSpinner size="md" />
                             </div>
-                        ) : history.length === 0 ? (
+                        ) : normalizedHistory.length === 0 ? (
                             <Card className="shadow-none border-secondary/20">
                                 <CardContent className="p-6 text-sm text-muted-foreground">
                                     No payroll history found.
@@ -118,7 +193,7 @@ const PayrollHistoryList = () => {
                                     <Table>
                                         <THeader>
                                             <TRow>
-                                                <THead className="min-w-28 px-2">Pay Day</THead>
+                                                <THead className="min-w-28 px-2">Pay Date</THead>
                                                 <THead className="min-w-28 px-2">Period #</THead>
                                                 <THead className="min-w-40 px-2">Period</THead>
                                                 <THead className="min-w-28 px-2 text-right">Employees / Excluded</THead>
@@ -149,7 +224,9 @@ const PayrollHistoryList = () => {
                                                         onClick={canView ? () => navigate(`/app/payroll/history/${viewId}`) : undefined}
                                                     >
                                                         <TCell className="text-gray-700 dark:text-white/70 text-sm px-2 py-3">
-                                                            {item.pay_day ? formatDate(item.pay_day) : '-'}
+                                                            {item.pay_date ?? item.pay_day
+                                                                ? formatDate((item.pay_date ?? item.pay_day) as string)
+                                                                : '-'}
                                                         </TCell>
                                                         <TCell className="text-gray-700 dark:text-white/70 text-sm px-2 py-3">
                                                             {item.period_key ?? '-'}

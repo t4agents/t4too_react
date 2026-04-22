@@ -7,17 +7,42 @@ import { useEffect } from 'react';
 import { supabase, getUserAvatar } from './core/supabase';
 import { useUserProfileStore } from './store/user-profile-store';
 import { useAuthStore } from './store/auth-store';
+import { useClientStore } from './store/client-store';
 import config from './config';
 
 function App() {
     useEffect(() => {
         const setAuthUser = useAuthStore.getState().setUser;
         const setAuthReady = useAuthStore.getState().setReady;
+        const setActiveBE = useClientStore.getState().setActiveBE;
 
         const setAvatarUrl = useUserProfileStore.getState().setFBAvatar;
         // const hydrateFromApi = useUserProfileStore.getState().hydrateFromApi;
         const setFBClientName = useUserProfileStore.getState().setFBClientName;
         const setFBName = useUserProfileStore.getState().setFBName;
+        const syncActiveClientFromUser = (
+            user: { user_metadata?: Record<string, unknown> } | null,
+        ) => {
+            const metadata = (user?.user_metadata ?? {}) as Record<string, unknown>;
+            const clientId =
+                typeof metadata.sbu_client_id === 'string' && metadata.sbu_client_id.trim()
+                    ? metadata.sbu_client_id.trim()
+                    : null;
+            const clientName =
+                typeof metadata.sbu_client_name === 'string' && metadata.sbu_client_name.trim()
+                    ? metadata.sbu_client_name.trim()
+                    : clientId ?? '';
+
+            if (clientId) {
+                setActiveBE({
+                    active_zbid: clientId,
+                    name: clientName || clientId,
+                });
+                return;
+            }
+
+            setActiveBE(null);
+        };
 
         const initializeAuth = async () => {
             const { data } = await supabase.auth.getSession();
@@ -27,6 +52,7 @@ function App() {
             setAvatarUrl(getUserAvatar(user));
             setFBClientName(user?.user_metadata?.sbu_client_name ?? '');
             setFBName(user?.user_metadata?.sbu_name ?? '');
+            syncActiveClientFromUser(user);
 
             // if (user) {
             //     void hydrateFromApi();
@@ -42,6 +68,7 @@ function App() {
             setAvatarUrl(getUserAvatar(user));
             setFBClientName(user?.user_metadata?.sbu_client_name ?? '');
             setFBName(user?.user_metadata?.sbu_name ?? '');
+            syncActiveClientFromUser(user);
             // if (user) {
             //     void hydrateFromApi();
             // }
