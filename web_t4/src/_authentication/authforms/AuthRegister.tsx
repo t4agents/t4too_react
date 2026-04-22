@@ -92,13 +92,15 @@ const AuthRegister = () => {
 
             if (error) {throw error;}
 
-            // if (!data.session) {
-            //     notifyToast({
-            //         message: "Check your email to confirm your account, then sign in.",
-            //         variant: "info",
-            //     });
-            //     return;
-            // }
+            const uid = data.user?.id;
+            if (!uid) throw new Error("No user id");
+
+            // persist uid into auth metadata as sbu_client_id
+            const { error: updateError } = await supabase.auth.updateUser({
+                data: {sbu_client_id: uid,},
+            });
+
+            if (updateError) throw updateError;
 
             await runNewUserProvisioning();
             // await runNewUserProvisioning({

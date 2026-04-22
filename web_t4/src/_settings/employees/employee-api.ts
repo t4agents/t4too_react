@@ -43,12 +43,14 @@ export const employeeAPI = {
 
         return response.json();
     },
+
+
     /*** List all employees with pagination*/
     async listEmployees(params?: PaginationInterface): Promise<Employee[]> {
-        const activeBizId = useClientStore.getState().activeBE?.active_zbid;
-        if (!activeBizId) {
-            throw new Error('No active client selected. Please select a client first.');
-        }
+        // const activeBizId = useClientStore.getState().activeBE?.active_zbid;
+        // if (!activeBizId) {
+        //     throw new Error('No active client selected. Please select a client first.');
+        // }
 
         const queryParams = new URLSearchParams();
         if (params?.skip !== undefined) {
@@ -59,8 +61,8 @@ export const employeeAPI = {
         }
 
         const path = queryParams.toString()
-            ? `/employee/list?${queryParams.toString()}`
-            : '/employee/list';
+            ? `/t4/get_employee_list?${queryParams.toString()}`
+            : '/t4/get_employee_list';
 
         const response = await apiFetch(path);
 
