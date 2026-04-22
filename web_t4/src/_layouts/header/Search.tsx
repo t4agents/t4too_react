@@ -394,7 +394,7 @@ function Search() {
     const [searchError, setSearchError] = useState<string | null>(null);
     const [searchResult, setSearchResult] = useState<NormalizedSearch | null>(null);
     const [searchStatusLines, setSearchStatusLines] = useState<string[]>([]);
-const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
     const [dropdownStyle, setDropdownStyle] = useState<{ left: number; top: number; width: number }>({
         left: 0,
         top: 0,
@@ -402,10 +402,20 @@ const [isOpen, setIsOpen] = useState(false);
     });
     const wrapperRef = useRef<HTMLDivElement | null>(null);
     const dropdownRef = useRef<HTMLDivElement | null>(null);
+    const searchReqIdRef = useRef(0);
+
+    const traceSearch = (requestId: number, message: string, data?: unknown) => {
+        if (data !== undefined) {
+            console.log(`[SSE][Search req=${requestId}] ${message}`, data);
+            return;
+        }
+        console.log(`[SSE][Search req=${requestId}] ${message}`);
+    };
 
     useEffect(() => {
         const trimmed = query.trim();
         if (!trimmed) {
+            traceSearch(0, 'query empty -> clear search state');
             setSearchResult(null);
             setSearchError(null);
             setSearchLoading(false);
@@ -414,36 +424,67 @@ const [isOpen, setIsOpen] = useState(false);
         }
 
         let cancelled = false;
+        const requestId = ++searchReqIdRef.current;
+        const requestedAt = performance.now();
+        traceSearch(requestId, 'query changed -> debounce scheduled', { query: trimmed });
+
         const handle = window.setTimeout(async () => {
+            traceSearch(requestId, 'debounce fired -> start request');
             try {
                 setSearchLoading(true);
                 setSearchError(null);
                 setSearchStatusLines(['Thinking...']);
                 const payload = await historyAPI.searchPayrollHistory(trimmed, 5, (status, meta) => {
                     if (cancelled) return;
+                    traceSearch(requestId, 'status callback', { status, meta });
                     const next = formatStatusLabel(status, meta);
                     setSearchStatusLines((prev) => {
-                        if (status === 'start') return [next];
+                        if (status === 'start') {
+                            traceSearch(requestId, 'status lines reset', { next });
+                            return [next];
+                        }
                         if (prev[prev.length - 1] === next) return prev;
-                        return [...prev, next];
+                        const updated = [...prev, next];
+                        traceSearch(requestId, 'status lines append', {
+                            previousCount: prev.length,
+                            nextCount: updated.length,
+                            line: next,
+                        });
+                        return updated;
                     });
                 });
                 if (cancelled) return;
+                traceSearch(requestId, 'request resolved', {
+                    elapsedMs: (performance.now() - requestedAt).toFixed(1),
+                    payloadType: Array.isArray(payload) ? 'array' : typeof payload,
+                });
                 setSearchResult(normalizeSearchResponse(payload));
             } catch (err) {
                 if (cancelled) return;
+                traceSearch(requestId, 'request failed', err);
                 setSearchError(err instanceof Error ? err.message : 'Search failed');
                 setSearchResult(null);
             } finally {
-                if (!cancelled) setSearchLoading(false);
+                if (!cancelled) {
+                    traceSearch(requestId, 'request finished');
+                    setSearchLoading(false);
+                }
             }
         }, 350);
 
         return () => {
             cancelled = true;
             window.clearTimeout(handle);
+            traceSearch(requestId, 'effect cleanup -> request cancelled');
         };
     }, [query]);
+
+    useEffect(() => {
+        console.log('[SSE][Search] status lines state changed', {
+            count: searchStatusLines.length,
+            lines: searchStatusLines,
+        });
+    }, [searchStatusLines]);
 
 
     useEffect(() => {

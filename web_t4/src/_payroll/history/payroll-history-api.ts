@@ -54,8 +54,27 @@ export interface PayrollHistoryDetailResponse {
 type StatusCallback = (status: string, meta: Record<string, unknown>) => void;
 
 async function parseSseResponse<T>(response: Response, onStatus?: StatusCallback): Promise<T> {
+    const startedAt = performance.now();
+    const trace = (message: string, data?: unknown) => {
+        const elapsedMs = (performance.now() - startedAt).toFixed(1);
+        if (data !== undefined) {
+            console.log(`[SSE][payroll-history +${elapsedMs}ms] ${message}`, data);
+            return;
+        }
+        console.log(`[SSE][payroll-history +${elapsedMs}ms] ${message}`);
+    };
+
     const contentType = response.headers.get('content-type') || '';
+    trace('response headers', {
+        status: response.status,
+        contentType,
+        transferEncoding: response.headers.get('transfer-encoding'),
+        cacheControl: response.headers.get('cache-control'),
+        connection: response.headers.get('connection'),
+    });
+
     if (!response.body || !contentType.includes('text/event-stream')) {
+        trace('non-SSE response detected; parsing as JSON');
         return response.json();
     }
 
@@ -63,15 +82,34 @@ async function parseSseResponse<T>(response: Response, onStatus?: StatusCallback
     const decoder = new TextDecoder();
     let buffer = '';
     let finalPayload: T | null = null;
+    let chunkIndex = 0;
 
     let doneEarly = false;
     while (true) {
         const { value, done } = await reader.read();
+        chunkIndex += 1;
+        trace('reader chunk', {
+            chunkIndex,
+            done,
+            byteLength: value?.byteLength ?? 0,
+        });
         if (done) break;
 
-        buffer += decoder.decode(value, { stream: true });
+        const decodedChunk = decoder.decode(value, { stream: true });
+        trace('chunk preview', {
+            chunkIndex,
+            preview: decodedChunk.slice(0, 180),
+            hasCrlfSeparator: decodedChunk.includes('\r\n\r\n'),
+            hasLfSeparator: decodedChunk.includes('\n\n'),
+        });
+        buffer += decodedChunk;
         const parts = buffer.split('\n\n');
         buffer = parts.pop() || '';
+        trace('buffer split', {
+            completeEventBlocks: parts.length,
+            pendingBufferLength: buffer.length,
+            hasPendingCrlfSeparator: buffer.includes('\r\n\r\n'),
+        });
 
         for (const part of parts) {
             const lines = part.split('\n');
@@ -88,27 +126,42 @@ async function parseSseResponse<T>(response: Response, onStatus?: StatusCallback
             try {
                 payload = JSON.parse(data);
             } catch {
+                trace('json parse failed for event block', { preview: data.slice(0, 220) });
                 continue;
             }
 
+            trace('event parsed', {
+                event,
+                status: payload?.status,
+                keys: payload && typeof payload === 'object' ? Object.keys(payload) : [],
+            });
+
             if (event === 'status') {
+                trace('status callback fired', { status: payload.status, meta: payload.meta ?? {} });
                 onStatus?.(payload.status, payload.meta ?? {});
             } else if (event === 'final') {
                 finalPayload = payload.response as T;
+                trace('final event received');
                 doneEarly = true;
                 break;
             } else if (event === 'error') {
+                trace('error event received', payload);
                 throw new Error(payload.message || 'Streaming error');
             }
         }
 
         if (doneEarly) {
             await reader.cancel();
+            trace('stream cancelled after final event');
             break;
         }
     }
 
-    if (finalPayload !== null) return finalPayload;
+    if (finalPayload !== null) {
+        trace('stream complete with final payload');
+        return finalPayload;
+    }
+    trace('stream ended without final payload');
     throw new Error('Stream ended without a final response.');
 }
 
@@ -158,11 +211,17 @@ export const historyAPI = {
     },
 
     async searchPayrollHistory(query: string, topK = 5, onStatus?: StatusCallback): Promise<unknown> {
+        console.log('[SSE][payroll-history] request start', {
+            path: '/ai/brain/lgstream',
+            query,
+            topK,
+            ts: new Date().toISOString(),
+        });
         // const response = await apiFetch('/embedding/rag_answer_rerank', {
         // const response = await apiFetch('/embedding/route_answer', {
         // const response = await apiFetch('/brain/python', {
         // const response = await apiFetch('/brain/langgraph', {
-        const response = await apiFetch('/brain/lgstream', {
+        const response = await apiFetch('/ai/brain/lgstream', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
             body: JSON.stringify({ query, top_k: topK }),

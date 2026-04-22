@@ -15,7 +15,7 @@ export type FeedbackPayload = {
 
 export const feedbackAPI = {
     async submitFeedback(payload: FeedbackPayload): Promise<void> {
-        const response = await apiFetch('/brain/feedback', {
+        const response = await apiFetch('/ai/brain/feedback', {
             method: 'POST',
             body: JSON.stringify(payload),
         });
