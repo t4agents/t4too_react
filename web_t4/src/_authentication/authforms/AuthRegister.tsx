@@ -107,6 +107,11 @@ const AuthRegister = () => {
             //     displayName: trimmedName,
             //     photoURL: `https://raw.githubusercontent.com/t4agents/t4agents/refs/heads/main/t4favicon.png`,
             // });
+            
+            // Refresh session to get JWT with updated app_metadata (sba_ten_id)
+            const { error: refreshError } = await supabase.auth.refreshSession();
+            if (refreshError) console.warn('Session refresh warning:', refreshError);
+            
             navigate("/app");
 
         } catch (error: any) {

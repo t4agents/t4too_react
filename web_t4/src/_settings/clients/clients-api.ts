@@ -59,7 +59,7 @@ export function normalizeClientsPayload(data: unknown): NormalizedClientsPayload
 
 export const clientsAPI = {
     async createClient(data: Partial<ClientDB>) {
-        const response = await apiFetch('/be/new', {
+        const response = await apiFetch('/too/post_client', {
             method: 'POST',
             body: JSON.stringify(data),
         });
