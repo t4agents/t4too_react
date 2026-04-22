@@ -70,8 +70,8 @@ export const entryAPI = {
         }
 
         const path = queryParams.toString()
-            ? `/entry/show_current_entry?${queryParams.toString()}`
-            : '/entry/show_current_entry';
+            ? `/t4/get_payroll_entry_list?${queryParams.toString()}`
+            : '/t4/get_payroll_entry_list';
 
         const response = await apiFetch(path);
 
@@ -88,7 +88,7 @@ export const entryAPI = {
 
 
     async finalizePayroll(): Promise<[]> {
-        const response = await apiFetch('/entry/finalize', { method: 'POST' });
+        const response = await apiFetch('/t4/post_payroll_entry_finalize', { method: 'POST' });
 
         if (!response.ok) {
             const details = await response.text().catch(() => '');
@@ -112,8 +112,8 @@ export const entryAPI = {
         }
 
         const path = queryParams.toString()
-            ? `/entry/show_current_entry?${queryParams.toString()}`
-            : '/entry/show_current_entry';
+            ? `/t4/get_payroll_entry_list?${queryParams.toString()}`
+            : '/t4/get_payroll_entry_list';
 
         const response = await apiFetch(path);
 

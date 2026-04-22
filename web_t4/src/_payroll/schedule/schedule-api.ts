@@ -43,8 +43,8 @@ export const scheduleAPI = {
         if (params?.status !== undefined) {queryParams.append('status', params.status);}
 
         const path = queryParams.toString()
-            ? `/schedule/list/?${queryParams.toString()}`
-            : '/schedule/list';
+            ? `/t4/get_payroll_schedule_list?${queryParams.toString()}`
+            : '/t4/get_payroll_schedule_list';
 
         const response = await apiFetch(path);
 
@@ -56,7 +56,7 @@ export const scheduleAPI = {
 
     /*** edit payroll schedule*/
     async editSchedule(payload: PayrollSchedule): Promise<PayrollSchedule> {
-        const response = await apiFetch(`/schedule/edit`, {method: 'POST', body: JSON.stringify(payload),});
+        const response = await apiFetch(`/t4/post_payroll_schedule`, {method: 'POST', body: JSON.stringify(payload),});
         if (!response.ok) { throw new Error(`Failed to update payroll schedule: ${response.statusText}`); }
         return response.json();
     },
