@@ -218,7 +218,7 @@ export const historyAPI = {
             topK,
             ts: new Date().toISOString(),
         });
-        const response = await apiFetch('/ai/rag_query', {
+        const response = await apiFetch('/rag/rag_cosine', {
         // const response = await apiFetch('/ai/embedding/rag_answer_rerank', {
         // const response = await apiFetch('/ai/embedding/route_answer', {
         // const response = await apiFetch('/ai/brain/python', {
