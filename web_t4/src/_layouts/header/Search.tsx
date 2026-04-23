@@ -110,11 +110,40 @@ const pickFirstString = (...values: Array<unknown>): string | null => {
     return null;
 };
 
+const toNumberSafe = (value: unknown): number | null => {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string') {
+        const parsed = Number(value);
+        if (Number.isFinite(parsed)) return parsed;
+    }
+    return null;
+};
+
+const resolvePayrollItemTitle = (row: Record<string, unknown>): string | null => {
+    const periodStart = toStringSafe(row.period_start);
+    const periodEnd = toStringSafe(row.period_end);
+    const payDay = toStringSafe(row.pay_day);
+    const periodKey = toStringSafe(row.period_key);
+    const fullName = toStringSafe(row.full_name);
+
+    if (periodStart && periodEnd) return `${formatDate(periodStart)} - ${formatDate(periodEnd)}`;
+    if (payDay) return `Pay Day: ${formatDate(payDay)}`;
+    if (periodKey) return `Period #${periodKey}`;
+    if (fullName) return fullName;
+    return null;
+};
+
 const toGenericItem = (value: unknown, index: number): GenericItem => {
     if (!value || typeof value !== 'object') {
         return { title: String(value ?? `Result ${index + 1}`), payload: value };
     }
     const entry = value as Record<string, unknown>;
+    const nestedHistory =
+        entry.history && typeof entry.history === 'object' ? (entry.history as Record<string, unknown>) : null;
+    const sourceRow =
+        nestedHistory ??
+        (isPayrollRow(entry) ? entry : null);
+
     const snippet = pickFirstString(
         entry.snippet,
         entry.summary,
@@ -127,15 +156,50 @@ const toGenericItem = (value: unknown, index: number): GenericItem => {
         entry.answer,
         entry.result,
         entry.message,
+        nestedHistory?.notes,
+        nestedHistory?.memo,
     );
-    const rawTitle = pickFirstString(entry.title, entry.name, entry.label, entry.question, entry.query);
-    const title = rawTitle ?? (snippet ? trimText(snippet, 64) : `Result ${index + 1}`);
-    const subtitle = pickFirstString(entry.source, entry.type, entry.mode, entry.provider, entry.engine, entry.metadata);
+    const rawTitle = pickFirstString(
+        entry.title,
+        entry.name,
+        entry.label,
+        entry.question,
+        entry.query,
+        nestedHistory?.full_name,
+    );
+    const payrollTitle = sourceRow ? resolvePayrollItemTitle(sourceRow) : null;
+    const title = payrollTitle ?? rawTitle ?? (snippet ? trimText(snippet, 64) : `Result ${index + 1}`);
+
+    const moneyValue = sourceRow
+        ? toNumberSafe(sourceRow.total_net) ??
+            toNumberSafe(sourceRow.net) ??
+            toNumberSafe(sourceRow.total_gross) ??
+            toNumberSafe(sourceRow.gross)
+        : null;
+    const moneyLabel = moneyValue !== null ? formatMoney(moneyValue) : null;
+
+    const subtitle = pickFirstString(
+        entry.source,
+        entry.type,
+        entry.mode,
+        entry.provider,
+        entry.engine,
+        nestedHistory?.employment_type,
+        entry.source_id,
+    );
+    const resolvedSnippet = sourceRow
+        ? pickFirstString(
+            snippet,
+            nestedHistory?.full_name ? `Employee: ${nestedHistory.full_name}` : null,
+            moneyLabel ? `Amount: ${moneyLabel}` : null,
+            nestedHistory?.employee_count ? `Employees: ${nestedHistory.employee_count}` : null,
+        )
+        : snippet;
     const url = (entry.url as string) ?? (entry.link as string);
     return {
         title: String(title),
         subtitle: subtitle ? trimText(String(subtitle), 60) : undefined,
-        snippet: snippet ? trimText(String(snippet), 280) : undefined,
+        snippet: resolvedSnippet ? trimText(String(resolvedSnippet), 280) : undefined,
         url: url ? String(url) : undefined,
         payload: value,
     };

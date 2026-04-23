@@ -218,11 +218,12 @@ export const historyAPI = {
             topK,
             ts: new Date().toISOString(),
         });
-        // const response = await apiFetch('/embedding/rag_answer_rerank', {
-        // const response = await apiFetch('/embedding/route_answer', {
-        // const response = await apiFetch('/brain/python', {
-        // const response = await apiFetch('/brain/langgraph', {
-        const response = await apiFetch('/ai/brain/lgstream', {
+        const response = await apiFetch('/ai/rag_query', {
+        // const response = await apiFetch('/ai/embedding/rag_answer_rerank', {
+        // const response = await apiFetch('/ai/embedding/route_answer', {
+        // const response = await apiFetch('/ai/brain/python', {
+        // const response = await apiFetch('/ai/brain/langgraph', {
+        // const response = await apiFetch('/ai/brain/lgstream', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
             body: JSON.stringify({ query, top_k: topK }),
