@@ -131,7 +131,7 @@ export const entryAPI = {
     async updatePayrollEntry(
         payload: PayrollEntryResponse,
     ): Promise<PayrollEntryResponse> {
-        const response = await apiFetch('/entry/edit', {
+        const response = await apiFetch('/t4/post_payroll_entry_edit', {
             method: 'POST',
             body: JSON.stringify(payload),
         });

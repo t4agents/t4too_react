@@ -10,7 +10,7 @@ import { entryAPI } from 'src/_payroll/entry/payroll-entry-api';
 import { useClientStore } from 'src/store/client-store';
 import { PayrollSchedule } from 'src/types/payroll';
 import { Link, useNavigate } from 'react-router';
-import { formatDate, formatMoney, toNumber } from 'src/core/format';
+import { formatDate, formatMoney, formatMoneyInteger, toNumber } from 'src/core/format';
 import { historyAPI } from 'src/_payroll/history/payroll-history-api';
 import EmployeePickerModal from 'src/_payroll/entry/components/EmployeePickerModal';
 import { Employee } from 'src/types/employee';
@@ -522,19 +522,19 @@ const PayrollContent = ({ activeBizId }: { activeBizId: string | null }) => {
                 <CardHeader className="p-0 pb-1">
                     <CardTitle className="text-sm font-medium text-muted-foreground">Gross</CardTitle>
                 </CardHeader>
-                <CardContent className="p-0 text-2xl font-semibold">{formatMoney(totals.gross)}</CardContent>
+                <CardContent className="p-0 text-xl ">{formatMoneyInteger(totals.gross)}</CardContent>
             </Card>
             <Card className="w-[150px] gap-1 p-3 rounded-md shadow-none border-secondary/20 bg-transparent">
                 <CardHeader className="p-0 pb-1">
                     <CardTitle className="text-sm font-medium text-muted-foreground">Net</CardTitle>
                 </CardHeader>
-                <CardContent className="p-0 text-2xl font-semibold">{formatMoney(totals.net)}</CardContent>
+                <CardContent className="p-0 text-xl ">{formatMoneyInteger(totals.net)}</CardContent>
             </Card>
             <Card className="w-[150px] gap-1 p-3 rounded-md shadow-none border-secondary/20 bg-transparent">
                 <CardHeader className="p-0 pb-1">
                     <CardTitle className="text-sm font-medium text-muted-foreground">Draft / Excluded</CardTitle>
                 </CardHeader>
-                <CardContent className="p-0 text-2xl font-semibold">{totals.draft} / {totals.excluded}</CardContent>
+                <CardContent className="p-0 text-xl">{totals.draft} / {totals.excluded}</CardContent>
             </Card>
         </div>
     );
