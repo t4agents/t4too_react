@@ -224,10 +224,8 @@ export const historyAPI = {
         // const response = await apiFetch('/rag1unit/hybrid', {
         // const response = await apiFetch('/rag2llm/llm_answer', {
         // const response = await apiFetch('/rag2llm/rerank', {
-        const response = await apiFetch('/rag2llm/rerank_stream', {
-        // const response = await apiFetch('/ai/embedding/rag_answer_rerank', {
-        // const response = await apiFetch('/ai/embedding/route_answer', {
-        // const response = await apiFetch('/ai/brain/python', {
+        // const response = await apiFetch('/rag2llm/rerank_stream', {
+        const response = await apiFetch('/mcpbrain/python', {
         // const response = await apiFetch('/ai/brain/langgraph', {
         // const response = await apiFetch('/ai/brain/lgstream', {
             method: 'POST',
