@@ -213,7 +213,7 @@ export const historyAPI = {
 
     async searchPayrollHistory(query: string, topK = 5, onStatus?: StatusCallback): Promise<unknown> {
         console.log('[SSE][payroll-history] request start', {
-            path: '/ai/brain/lgstream',
+            path: '/mcpbrain/lgstream',
             query,
             topK,
             ts: new Date().toISOString(),
@@ -225,9 +225,9 @@ export const historyAPI = {
         // const response = await apiFetch('/rag2llm/llm_answer', {
         // const response = await apiFetch('/rag2llm/rerank', {
         // const response = await apiFetch('/rag2llm/rerank_stream', {
-        const response = await apiFetch('/mcpbrain/python', {
-        // const response = await apiFetch('/ai/brain/langgraph', {
-        // const response = await apiFetch('/ai/brain/lgstream', {
+        // const response = await apiFetch('/mcpbrain/python', {
+        // const response = await apiFetch('/mcpbrain/langgraph', {
+        const response = await apiFetch('/mcpbrain/lgstream', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
             body: JSON.stringify({ query, top_k: topK }),
