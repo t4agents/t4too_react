@@ -48,8 +48,7 @@ type NewUserProfile = {
 };
 
 export async function runNewUserProvisioning(): Promise<void> {
-    // const response = await apiFetch('/r1_new_user_provision', { method: 'POST' });
-    const response = await apiFetch('/too/r1_new_user_provision_with_seed', { method: 'POST' });
+    const response = await apiFetch('/too/new_user_provision_seed', { method: 'POST' });
 
     if (!response.ok) throw new Error(await response.text());
 }
