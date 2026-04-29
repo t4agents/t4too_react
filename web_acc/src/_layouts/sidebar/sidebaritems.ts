@@ -37,7 +37,7 @@ const SidebarContent: MenuItem[] = [
         heading: 'Home',
         children: [
             {
-                name: 'Overview',
+                name: 'AI Agent Workspace',
                 icon: 'solar:widget-2-linear',
                 id: uniqueId(),
                 url: '/app',
@@ -49,24 +49,38 @@ const SidebarContent: MenuItem[] = [
 
 
     {
-        heading: 'payroll',
+        heading: 'AI Accounting',
         children: [
             {
-                name: 'Run Payroll',
+                name: 'Inbox',
                 icon: 'solar:play-circle-linear',
                 id: uniqueId(),
                 url: '/app/payroll/entry',
             },
 
             {
-                name: 'Payroll History',
+                name: 'Entries',
                 icon: 'solar:history-linear',
                 id: uniqueId(),
                 url: '/app/payroll/history',
             },
 
             {
-                name: 'Schedules',
+                name: 'Ledger',
+                icon: 'solar:calendar-linear',
+                id: uniqueId(),
+                url: '/app/payroll/schedule',
+            },
+
+            {
+                name: 'Reports',
+                icon: 'solar:calendar-linear',
+                id: uniqueId(),
+                url: '/app/payroll/schedule',
+            },
+
+            {
+                name: 'Close Period',
                 icon: 'solar:calendar-linear',
                 id: uniqueId(),
                 url: '/app/payroll/schedule',
@@ -83,19 +97,6 @@ const SidebarContent: MenuItem[] = [
                 icon: 'solar:user-circle-linear',
                 url: '/app/user-profile',
                 isPro: false,
-            },
-            {
-                id: uniqueId(),
-                name: 'Clients',
-                icon: 'solar:buildings-2-linear',
-                url: '/app/clients',
-                isPro: false,
-            },
-            {
-                name: 'Employees',
-                icon: 'solar:users-group-rounded-linear',
-                id: uniqueId(),
-                url: '/app/settings/employee',
             },
             {
                 name: 'Billing & Subscription',
