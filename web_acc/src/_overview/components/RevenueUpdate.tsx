@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from 'src/components/ui/select';
-import { ApexOptions } from 'apexcharts';
+import { type ApexAxisChartSeries, type ApexOptions } from 'apexcharts';
 
 const RevenueUpdate = () => {
   const [selectedMonth, setSelectedMonth] = useState('Year 2025');
