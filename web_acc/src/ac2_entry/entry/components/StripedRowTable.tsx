@@ -7,7 +7,7 @@ import {
   TRow,
 } from 'src/components/ui/table';
 import { Badge } from 'src/components/ui/badge';
-import { TablePerformersData } from 'src/_payroll/entry/components/table-data';
+import { TablePerformersData } from './table-data';
 import CardBox from 'src/components/shared/CardBox';
 import {
   DropdownMenu,
@@ -17,9 +17,8 @@ import {
 } from 'src/components/ui/dropdown-menu';
 import { TbDotsVertical } from 'react-icons/tb';
 import { Icon } from '@iconify/react';
-import { Checkbox } from 'src/components/ui/checkbox';
 
-function CheckboxTable() {
+function StripedRowTable() {
   const tableActionData = [
     {
       icon: 'solar:add-circle-outline',
@@ -37,7 +36,7 @@ function CheckboxTable() {
 
   return (
     <CardBox>
-      <h3 className="text-xl font-semibold mb-2">Checkbox Table</h3>
+      <h3 className="text-xl font-semibold mb-2">Striped-Row Table</h3>
       <div className="flex flex-col border rounded-md border-ld ">
         <div className="-m-1.5 overflow-x-auto">
           <div className="p-1.5 min-w-full inline-block align-middle">
@@ -45,7 +44,6 @@ function CheckboxTable() {
               <Table>
                 <THeader>
                   <TRow>
-                    <THead className="text-sm font-semibold ">#</THead>
                     <THead className="text-sm font-semibold ">Assigned</THead>
                     <THead className="text-sm font-semibold">Project</THead>
                     <THead className="text-sm font-semibold">Priority</THead>
@@ -54,12 +52,11 @@ function CheckboxTable() {
                 </THeader>
 
                 <TBody>
-                  {TablePerformersData.map((item: (typeof TablePerformersData)[number], index: number) => (
-                    <TRow key={index}>
-                      <TCell className="whitespace-nowrap">
-                        <Checkbox />
-                      </TCell>
-
+                  {TablePerformersData.map((item, index) => (
+                    <TRow
+                      key={index}
+                      className="group/row bg-transparentodd:bg-transparent even:bg-lightprimary dark:even:bg-lightprimary"
+                    >
                       {/* Assigned */}
                       <TCell className="ps-3 min-w-[200px]">
                         <div className="flex gap-3 items-center">
@@ -119,4 +116,4 @@ function CheckboxTable() {
   );
 }
 
-export default CheckboxTable;
+export default StripedRowTable;

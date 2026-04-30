@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { periodAPI } from 'src/_payroll/periods/components/period-api';
+import { periodAPI } from 'src/ac1_inbox/periods/components/period-api';
 import { PayrollPeriod } from 'src/types/payroll';
 
 type PayrollStoreState = {

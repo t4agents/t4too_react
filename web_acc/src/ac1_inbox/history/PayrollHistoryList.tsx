@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import BreadcrumbComp from 'src/_layouts/shared/breadcrumb/BreadcrumbComp';
-import { historyAPI, PayrollHistoryResponse } from 'src/_payroll/history/payroll-history-api';
+import { historyAPI, PayrollHistoryResponse } from 'src/ac1_inbox/history/payroll-history-api';
 import { Badge } from 'src/components/ui/badge';
 import { Button } from 'src/components/ui/button';
 import { Card, CardContent } from 'src/components/ui/card';

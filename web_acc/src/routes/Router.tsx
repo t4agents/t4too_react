@@ -42,14 +42,14 @@ const BillingCancel = Loadable(lazy(() => import('src/_settings/billing/BillingC
 
 /* =========================Biz========================= */
 const Employee = Loadable(lazy(() => import('src/_settings/employees/Employee')));
-const PayrollScheduleEntrance = Loadable(lazy(() => import('src/_payroll/schedule/PayrollSchedule')));
-const PayrollHistoryList = Loadable(lazy(() => import('src/_payroll/history/PayrollHistoryList')));
-const PayrollHistoryDetail = Loadable(lazy(() => import('src/_payroll/history/PayrollHistoryDetail')));
+const PayrollScheduleEntrance = Loadable(lazy(() => import('src/ac1_inbox/schedule/PayrollSchedule')));
+const PayrollHistoryList = Loadable(lazy(() => import('src/ac1_inbox/history/PayrollHistoryList')));
+const PayrollHistoryDetail = Loadable(lazy(() => import('src/ac1_inbox/history/PayrollHistoryDetail')));
 
 const Notes = Loadable(lazy(() => import('src/_support/notes/Notes')));
 const Form = Loadable(lazy(() => import('src/components/form/Form')));
 const TableDefault = Loadable(lazy(() => import('src/components/table/Table_Default')));
-const Payroll = Loadable(lazy(() => import('src/_payroll/entry/Inbox')));
+const Payroll = Loadable(lazy(() => import('src/ac1_inbox/entry/Inbox')));
 const Tickets = Loadable(lazy(() => import('src/_support/ticket/Tickets')));
 const CreateTickets = Loadable(lazy(() => import('src/_support/ticket/CreateTickets')));
 const KB = Loadable(lazy(() => import('src/_support/kb/KB')));

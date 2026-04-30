@@ -4,7 +4,7 @@ import { Button } from 'src/components/ui/button';
 import { Checkbox } from 'src/components/ui/checkbox';
 import { Textarea } from 'src/components/ui/textarea';
 import { feedbackAPI } from 'src/_ai/feedback/ai-feedback-api';
-import { PayrollHistoryResponse } from 'src/_payroll/history/payroll-history-api';
+import { PayrollHistoryResponse } from 'src/ac1_inbox/history/payroll-history-api';
 import { formatDate } from 'src/core/format';
 
 type EvidenceItem = {

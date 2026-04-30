@@ -83,7 +83,7 @@ export const historyAPI = {
     },
 
     async getPayrollHistoryDetail(id: string): Promise<PayrollHistoryDetailResponse | PayrollHistoryResponse | PayrollHistoryResponse[]> {
-        const path = `/t4/get_payroll_history_detail/detail?id=${encodeURIComponent(id)}`;
+        const path = `/t4/getac1_inbox_history_detail/detail?id=${encodeURIComponent(id)}`;
         const response = await apiFetch(path);
 
         if (!response.ok) {

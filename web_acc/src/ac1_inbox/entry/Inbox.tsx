@@ -6,7 +6,7 @@ import { Table, TBody, TCell, THead, THeader, TRow } from 'src/components/ui/tab
 import LoadingSpinner from 'src/components/shared/LoadingSpinner';
 import { Icon } from '@iconify/react/dist/iconify.js';
 import { formatMoney } from 'src/core/format';
-import { AccountRow, inboxAPI, TxRow } from 'src/_payroll/entry/inbox-api';
+import { AccountRow, inboxAPI, TxRow } from 'src/ac1_inbox/entry/inbox-api';
 
 const BCrumb = [{ to: '/', title: 'Home' }, { title: 'Inbox' }];
 
