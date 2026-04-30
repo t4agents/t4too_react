@@ -16,7 +16,7 @@ src/
 └── App.tsx              # 根组件
 
 
-src/features/ac1_inbox/
+src/features/accounting/
 ├── domain/                          # 核心业务逻辑
 │   ├── entities/
 │   │   ├── Employee.ts              # 来自 types/employee.ts
@@ -32,7 +32,7 @@ src/features/ac1_inbox/
 │
 ├── infrastructure/                   # 外部依赖
 │   ├── api/
-│   │   ├── payroll-api.ts           # 来自 api/ac1_inbox/payroll-api.ts
+│   │   ├── payroll-api.ts           # 来自 api/accounting/payroll-api.ts
 │   │   └── employee-api.ts           # 来自 api/employee/employee-api.ts
 │   └── repositories/
 │       └── PayrollRepository.ts      # 新建
@@ -41,19 +41,19 @@ src/features/ac1_inbox/
     ├── components/
     │   ├── PayrollTable/
     │   │   ├── index.tsx
-    │   │   ├── PayrollDataTable.tsx     # 来自 components/ac1_inbox/PayrollDataTable.tsx
-    │   │   ├── CheckboxTable.tsx        # 来自 components/ac1_inbox/CheckboxTable.tsx
-    │   │   ├── HoverTable.tsx           # 来自 components/ac1_inbox/HoverTable.tsx
-    │   │   └── StripedRowTable.tsx      # 来自 components/ac1_inbox/StripedRowTable.tsx
+    │   │   ├── PayrollDataTable.tsx     # 来自 components/accounting/PayrollDataTable.tsx
+    │   │   ├── CheckboxTable.tsx        # 来自 components/accounting/CheckboxTable.tsx
+    │   │   ├── HoverTable.tsx           # 来自 components/accounting/HoverTable.tsx
+    │   │   └── StripedRowTable.tsx      # 来自 components/accounting/StripedRowTable.tsx
     │   ├── PayrollPeriod/
-    │   │   └── PayrollPeriodManager.tsx # 来自 components/ac1_inbox/PayrollPeriodManager.tsx（合并两个）
+    │   │   └── PayrollPeriodManager.tsx # 来自 components/accounting/PayrollPeriodManager.tsx（合并两个）
     │   ├── EmployeeForm/
-    │   │   └── EmployeeFormModal.tsx    # 来自 views/apps/ac1_inbox/EmployeeFormModal.tsx
+    │   │   └── EmployeeFormModal.tsx    # 来自 views/apps/accounting/EmployeeFormModal.tsx
     │   └── PayrollForm/
-    │       └── PayrollForm.tsx          # 来自 views/apps/ac1_inbox/PayrollForm.tsx
+    │       └── PayrollForm.tsx          # 来自 views/apps/accounting/PayrollForm.tsx
     │
     ├── pages/
-    │   ├── PayrollPage.tsx              # 来自 views/apps/ac1_inbox/Payroll.tsx
+    │   ├── PayrollPage.tsx              # 来自 views/apps/accounting/Payroll.tsx
     │   └── index.ts                      # 导出页面
     │
     ├── hooks/
@@ -141,7 +141,7 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 验收：勾选切换、新增、删除后 active client 行为正确。
 
 替换业务依赖点
-改动文件：src/_settings/employees/useEmployees.ts, src/ac1_inbox/PayrollEntry.tsx 等
+改动文件：src/_settings/employees/useEmployees.ts, src/accounting/PayrollEntry.tsx 等
 全部从 store 读 activeBizId。
 验收：不同模块切换 client 后数据同步刷新。
 

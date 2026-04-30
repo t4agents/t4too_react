@@ -7,7 +7,7 @@ import { Label } from 'src/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'src/components/ui/select';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from 'src/components/ui/dialog';
 
-import { scheduleAPI } from 'src/ac1_inbox/schedule/schedule-api';
+import { scheduleAPI } from 'src/accounting/schedule/schedule-api';
 import { PayrollSchedule } from 'src/types/payroll';
 import LoadingSpinner from 'src/components/shared/LoadingSpinner';
 import { getPayOnLabelForActivation, getPeriodLabelFromEffective } from './schedule-period';

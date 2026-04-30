@@ -174,8 +174,8 @@ export const historyAPI = {
         if (params?.limit !== undefined) queryParams.append('limit', String(params.limit));
 
         const path = queryParams.toString()
-            ? `/t4/getac1_inbox_history_list?${queryParams.toString()}`
-            : '/t4/getac1_inbox_history_list';
+            ? `/t4/getaccounting_history_list?${queryParams.toString()}`
+            : '/t4/getaccounting_history_list';
 
         const response = await apiFetch(path);
 
@@ -198,7 +198,7 @@ export const historyAPI = {
     },
 
     async getPayrollHistoryDetail(id: string): Promise<PayrollHistoryDetailResponse | PayrollHistoryResponse | PayrollHistoryResponse[]> {
-        const path = `/t4/getac1_inbox_history_detail?id=${encodeURIComponent(id)}`;
+        const path = `/t4/getaccounting_history_detail?id=${encodeURIComponent(id)}`;
         const response = await apiFetch(path);
 
         if (!response.ok) {

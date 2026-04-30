@@ -42,7 +42,7 @@ const TopCards = () => {
             img: iconSpeechBubble,
             bgcolor: "bg-success/10 dark:bg-success/10",
             textclr: "text-success dark:text-success",
-            url: "/ac1_inbox/schedule"
+            url: "/accounting/schedule"
         },
         // {
         //     key: "card3",
@@ -60,7 +60,7 @@ const TopCards = () => {
             img: iconMailbox,
             bgcolor: "bg-secondary/10 dark:bg-secondary/10",
             textclr: "text-primary dark:text-primary",
-            url: "/ac1_inbox/periods"
+            url: "/accounting/periods"
         },
         {
             key: "card7",

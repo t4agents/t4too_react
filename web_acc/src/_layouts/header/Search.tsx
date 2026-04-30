@@ -5,7 +5,7 @@ import SimpleBar from 'simplebar-react';
 import { Input } from 'src/components/ui/input';
 import { Badge } from 'src/components/ui/badge';
 import { FeedbackPanel } from 'src/_ai/feedback/FeedbackPanel';
-import { historyAPI, PayrollHistoryResponse } from 'src/ac1_inbox/history/payroll-history-api';
+import { historyAPI, PayrollHistoryResponse } from 'src/accounting/history/payroll-history-api';
 import { formatDate, formatMoney } from 'src/core/format';
 
 interface EvidenceItem {
