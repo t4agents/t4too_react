@@ -49,7 +49,7 @@ const PayrollHistoryDetail = Loadable(lazy(() => import('src/_payroll/history/Pa
 const Notes = Loadable(lazy(() => import('src/_support/notes/Notes')));
 const Form = Loadable(lazy(() => import('src/components/form/Form')));
 const TableDefault = Loadable(lazy(() => import('src/components/table/Table_Default')));
-const Payroll = Loadable(lazy(() => import('src/_payroll/entry/PayrollEntry')));
+const Payroll = Loadable(lazy(() => import('src/_payroll/entry/Inbox')));
 const Tickets = Loadable(lazy(() => import('src/_support/ticket/Tickets')));
 const CreateTickets = Loadable(lazy(() => import('src/_support/ticket/CreateTickets')));
 const KB = Loadable(lazy(() => import('src/_support/kb/KB')));

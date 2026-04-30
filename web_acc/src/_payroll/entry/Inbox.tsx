@@ -1,68 +1,30 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import BreadcrumbComp from 'src/_layouts/shared/breadcrumb/BreadcrumbComp';
 import { Card, CardContent, CardHeader, CardTitle } from 'src/components/ui/card';
 import { Button } from 'src/components/ui/button';
 import { Table, TBody, TCell, THead, THeader, TRow } from 'src/components/ui/table';
 import LoadingSpinner from 'src/components/shared/LoadingSpinner';
 import { Icon } from '@iconify/react/dist/iconify.js';
-import config from 'src/config';
 import { formatMoney } from 'src/core/format';
-import { useClientStore } from 'src/store/client-store';
+import { AccountRow, inboxAPI, TxRow } from 'src/_payroll/entry/inbox-api';
 
-const BCrumb = [{ to: '/', title: 'Home' }, { title: 'Payroll' }];
+const BCrumb = [{ to: '/', title: 'Home' }, { title: 'Inbox' }];
 
-const defaultBase = import.meta.env.VITE_ACCOUNTING_API_URL || `${config.api.baseUrl}/api/v1`;
-
-type TxRow = {
-    id: string;
-    txn_date?: string;
-    description?: string;
-    amount?: number | string;
-    status?: string;
-};
-
-type ApiContext = {
-    baseUrl: string;
-    ownerId: string;
-};
-
-async function request<T>(ctx: ApiContext, path: string, init: RequestInit = {}): Promise<T> {
-    const headers = new Headers(init.headers);
-    if (!headers.has('Content-Type') && init.body && !(init.body instanceof FormData)) {
-        headers.set('Content-Type', 'application/json');
-    }
-    if (ctx.ownerId) {
-        headers.set('X-Owner-Id', ctx.ownerId);
-    }
-    const res = await fetch(`${ctx.baseUrl}${path}`, { ...init, headers });
-    if (!res.ok) {
-        const detail = await res.text();
-        throw new Error(`${res.status} ${detail}`);
-    }
-    return res.json() as Promise<T>;
-}
-
-const Payroll = () => {
-    const activeBizId = useClientStore((state) => state.activeBE?.active_zbid ?? '');
+const Inbox = () => {
     const [file, setFile] = useState<File | null>(null);
-    const [accounts, setAccounts] = useState<any[]>([]);
+    const [accounts, setAccounts] = useState<AccountRow[]>([]);
     const [transactions, setTransactions] = useState<TxRow[]>([]);
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-
-    const ctx: ApiContext = useMemo(
-        () => ({ baseUrl: localStorage.getItem('tooacc_base') || defaultBase, ownerId: activeBizId || '' }),
-        [activeBizId],
-    );
 
     const refresh = async () => {
         setLoading(true);
         setError(null);
         try {
             const [tx, accts] = await Promise.all([
-                request<TxRow[]>(ctx, '/transactions?limit=200'),
-                request<any[]>(ctx, '/accounts'),
+                inboxAPI.listTransactions(),
+                inboxAPI.listAccounts(),
             ]);
             setTransactions(tx);
             setAccounts(accts);
@@ -76,11 +38,7 @@ const Payroll = () => {
     const applyCoa = async () => {
         setError(null);
         try {
-            const res = await request<{ created: number; existing: number }>(
-                ctx,
-                '/coa/templates/generic/apply',
-                { method: 'POST' },
-            );
+            const res = await inboxAPI.applyGenericCoa();
             setMsg(`COA applied. Created ${res.created}, existing ${res.existing}.`);
             await refresh();
         } catch (e: any) {
@@ -92,12 +50,7 @@ const Payroll = () => {
         if (!file) return;
         setError(null);
         try {
-            const form = new FormData();
-            form.append('file', file);
-            const res = await request<any>(ctx, '/transactions/import-csv', {
-                method: 'POST',
-                body: form,
-            });
+            const res = await inboxAPI.importCsv(file);
             setMsg(`Imported ${res.imported_count}, duplicates ${res.duplicate_count}.`);
             setFile(null);
             await refresh();
@@ -221,4 +174,4 @@ const Payroll = () => {
     );
 };
 
-export default Payroll;
+export default Inbox;
