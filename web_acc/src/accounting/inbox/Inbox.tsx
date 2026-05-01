@@ -105,7 +105,7 @@ const Inbox = () => {
 
     return (
         <>
-            <BreadcrumbComp title="Payroll Entries" items={BCrumb} leftContent={null} rightContent={headBoxes} />
+            <BreadcrumbComp title="AI Accounting" items={BCrumb} leftContent={null} rightContent={headBoxes} />
             <div className="flex gap-6 flex-col">
                 <Card className="shadow-none border-secondary/20">
                     <CardContent className="p-4 flex flex-col gap-3">
