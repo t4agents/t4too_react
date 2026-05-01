@@ -45,6 +45,7 @@ const Employee = Loadable(lazy(() => import('src/_settings/employees/Employee'))
 const PayrollScheduleEntrance = Loadable(lazy(() => import('src/accounting/schedule/PayrollSchedule')));
 const PayrollHistoryList = Loadable(lazy(() => import('src/accounting/history/PayrollHistoryList')));
 const PayrollHistoryDetail = Loadable(lazy(() => import('src/accounting/history/PayrollHistoryDetail')));
+const Ledger = Loadable(lazy(() => import('src/accounting/ledger/Ledger')));
 
 const Notes = Loadable(lazy(() => import('src/_support/notes/Notes')));
 const Form = Loadable(lazy(() => import('src/components/form/Form')));
@@ -80,6 +81,7 @@ const router = createBrowserRouter([
                     { path: 'payroll/entry', element: <Payroll /> },
                     { path: 'payroll/history', element: <PayrollHistoryList /> },
                     { path: 'payroll/history/:id', element: <PayrollHistoryDetail /> },
+                    { path: 'payroll/ledger', element: <Ledger /> },
                     { path: 'payroll/schedule', element: <PayrollScheduleEntrance /> },
 
                     { path: 'utilities/form', element: <Form /> },

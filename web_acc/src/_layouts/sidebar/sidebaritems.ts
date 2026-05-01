@@ -69,7 +69,7 @@ const SidebarContent: MenuItem[] = [
                 name: 'Ledger',
                 icon: 'solar:calendar-linear',
                 id: uniqueId(),
-                url: '/app/payroll/schedule',
+                url: '/app/payroll/ledger',
             },
 
             {
