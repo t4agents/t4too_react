@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import BreadcrumbComp from 'src/_layouts/shared/breadcrumb/BreadcrumbComp';
 import { Card, CardContent, CardHeader, CardTitle } from 'src/components/ui/card';
 import { Button } from 'src/components/ui/button';
@@ -7,16 +7,19 @@ import LoadingSpinner from 'src/components/shared/LoadingSpinner';
 import { Icon } from '@iconify/react/dist/iconify.js';
 import { formatMoney } from 'src/core/format';
 import { AccountRow, inboxAPI, TxRow } from 'src/accounting/inbox/inbox-api';
+import { Textarea } from 'src/components/ui/textarea';
 
 const BCrumb = [{ to: '/', title: 'Home' }, { title: 'Inbox' }];
 
 const Inbox = () => {
-    const [file, setFile] = useState<File | null>(null);
+    const uploadInputRef = useRef<HTMLInputElement | null>(null);
+    const cameraInputRef = useRef<HTMLInputElement | null>(null);
     const [accounts, setAccounts] = useState<AccountRow[]>([]);
     const [transactions, setTransactions] = useState<TxRow[]>([]);
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [transactionNote, setTransactionNote] = useState('');
     const [firstLineDraft, setFirstLineDraft] = useState({
         txn_date: '',
         description: '',
@@ -41,28 +44,37 @@ const Inbox = () => {
         }
     };
 
-    const applyCoa = async () => {
+    const uploadCsv = async (nextFile?: File) => {
+        if (!nextFile) return;
         setError(null);
         try {
-            const res = await inboxAPI.applyGenericCoa();
-            setMsg(`COA applied. Created ${res.created}, existing ${res.existing}.`);
-            await refresh();
-        } catch (e: any) {
-            setError(e?.message || 'Failed to apply COA.');
-        }
-    };
-
-    const uploadCsv = async () => {
-        if (!file) return;
-        setError(null);
-        try {
-            const res = await inboxAPI.importCsv(file);
+            const res = await inboxAPI.importCsv(nextFile);
             setMsg(`Imported ${res.imported_count}, duplicates ${res.duplicate_count}.`);
-            setFile(null);
             await refresh();
         } catch (e: any) {
             setError(e?.message || 'Failed to upload CSV.');
         }
+    };
+
+    const addTypedTransaction = async () => {
+        const note = transactionNote.trim();
+        if (!note) return;
+        setError(null);
+        setMsg(`Captured transaction note: ${note}`);
+        setTransactionNote('');
+        await refresh();
+    };
+
+    const handleCameraFile = async (nextFile?: File) => {
+        if (!nextFile) return;
+        setError(null);
+        setMsg(`Captured image: ${nextFile.name}`);
+        await refresh();
+    };
+
+    const handleVoiceCapture = () => {
+        setError(null);
+        // setMsg('Voice capture selected.');
     };
 
     const headBoxes = (
@@ -89,6 +101,10 @@ const Inbox = () => {
     );
 
     useEffect(() => {
+        refresh();
+    }, []);
+
+    useEffect(() => {
         const firstRow = transactions[0];
         if (!firstRow) {
             setFirstLineDraft({ txn_date: '', description: '', amount: '', status: '' });
@@ -107,57 +123,77 @@ const Inbox = () => {
         <>
             <BreadcrumbComp title="AI Accounting" items={BCrumb} leftContent={null} rightContent={headBoxes} />
             <div className="flex gap-6 flex-col">
-                <Card className="shadow-none border-secondary/20">
-                    <CardContent className="p-4 flex flex-col gap-3">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                            <div className="text-sm text-muted-foreground">
-                                Inbox Operations
-                            </div>
-                            <div className="flex flex-wrap items-center gap-2">
-                                <Button
-                                    variant="outline"
-                                    className="h-9 px-4 rounded-full border-secondary/30 text-secondary hover:bg-secondary/10"
-                                    onClick={applyCoa}
-                                >
-                                    <Icon icon="mdi:chart-tree" className="h-4 w-4" />
-                                    Apply Generic COA
-                                </Button>
+                {/* <Card className="shadow-none border-secondary/20"> */}
+                    <CardContent className="flex flex-col gap-3">
+
+                        <div className="rounded-md border border-secondary/20 bg-lightsecondary/10 p-4">
+                            <Textarea
+                                className="mt-0 min-h-[170px] resize-y bg-background text-base"
+                                value={transactionNote}
+                                onChange={(e) => setTransactionNote(e.target.value)}
+                                placeholder={'Type a transaction...\ne.g. "Uber 23 yesterday"'}
+                            />
+                            <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                                 <Button
                                     className="h-9 px-5 rounded-full shadow-sm"
-                                    onClick={refresh}
-                                    disabled={loading}
+                                    onClick={addTypedTransaction}
+                                    disabled={!transactionNote.trim()}
                                 >
-                                    {loading ? <LoadingSpinner size="sm" variant="dots" /> : <Icon icon="mdi:refresh" className="h-4 w-4" />}
-                                    {loading ? 'Refreshing...' : 'Refresh Inbox'}
+                                    <Icon icon="mdi:plus-circle-outline" className="h-4 w-4" />
+                                    Add to Inbox
                                 </Button>
-                            </div>
-                        </div>
 
-                        <div className="rounded-md border border-secondary/20 bg-lightsecondary/10 p-3">
-                            <div className="flex flex-col md:flex-row md:items-center gap-3">
-                                <label className="text-sm font-medium text-foreground md:min-w-28">
-                                    Upload CSV
-                                </label>
-                                <input
-                                    type="file"
-                                    accept=".csv"
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                    onChange={(e) => setFile(e.target.files?.[0] || null)}
-                                />
-                                <Button
-                                    className="h-9 px-5 rounded-full md:ml-auto"
-                                    onClick={uploadCsv}
-                                    disabled={!file}
-                                >
-                                    <Icon icon="material-symbols:upload-rounded" className="h-4 w-4" />
-                                    Upload CSV
-                                </Button>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <input
+                                        ref={uploadInputRef}
+                                        type="file"
+                                        accept=".csv"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            uploadCsv(e.target.files?.[0] || undefined);
+                                            e.target.value = '';
+                                        }}
+                                    />
+                                    <input
+                                        ref={cameraInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        capture="environment"
+                                        className="hidden"
+                                        onChange={(e) => handleCameraFile(e.target.files?.[0])}
+                                    />
+                                    <Button
+                                        variant="outline"
+                                        className="h-9 px-4 rounded-full"
+                                        onClick={() => uploadInputRef.current?.click()}
+                                        disabled={loading}
+                                    >
+                                        {loading ? <LoadingSpinner size="sm" variant="dots" /> : <Icon icon="material-symbols:upload-rounded" className="h-4 w-4" />}
+                                        Upload
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="h-9 px-4 rounded-full"
+                                        onClick={() => cameraInputRef.current?.click()}
+                                    >
+                                        <Icon icon="mdi:camera-outline" className="h-4 w-4" />
+                                        Camera
+                                    </Button>
+                                    {/* <Button
+                                        variant="outline"
+                                        className="h-9 px-4 rounded-full"
+                                        onClick={handleVoiceCapture}
+                                    >
+                                        <Icon icon="mdi:microphone-outline" className="h-4 w-4" />
+                                        Voice
+                                    </Button> */}
+                                </div>
                             </div>
                         </div>
                         {msg ? <p className="text-sm text-muted-foreground">{msg}</p> : null}
                         {error ? <p className="text-sm text-red-600">Error: {error}</p> : null}
                     </CardContent>
-                </Card>
+                {/* </Card> */}
 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     <Card className="shadow-none border-secondary/20">

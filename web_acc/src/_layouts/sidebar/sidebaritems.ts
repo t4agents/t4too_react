@@ -60,7 +60,7 @@ const SidebarContent: MenuItem[] = [
 
             {
                 name: 'Entries',
-                icon: 'solar:inbox-linear', 
+                icon: 'solar:inbox-linear',
                 id: uniqueId(),
                 url: '/app/acc/je',
             },
@@ -91,6 +91,12 @@ const SidebarContent: MenuItem[] = [
                 icon: 'solar:user-circle-linear',
                 url: '/app/user-profile',
                 isPro: false,
+            },
+            {
+                name: 'COA',
+                icon: 'solar:users-group-rounded-linear',
+                id: uniqueId(),
+                url: '/app/settings/employee',
             },
             {
                 name: 'Billing & Subscription',
