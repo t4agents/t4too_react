@@ -55,28 +55,28 @@ const SidebarContent: MenuItem[] = [
                 name: 'Inbox',
                 icon: 'solar:ufo-linear',
                 id: uniqueId(),
-                url: '/app/payroll/entry',
+                url: '/app/acc/inbox',
             },
 
             {
                 name: 'Entries',
                 icon: 'solar:inbox-linear', 
                 id: uniqueId(),
-                url: '/app/payroll/history',
+                url: '/app/acc/je',
             },
 
             {
                 name: 'Ledger',
                 icon: 'solar:layers-linear',
                 id: uniqueId(),
-                url: '/app/payroll/ledger',
+                url: '/app/acc/ledger',
             },
 
             {
                 name: 'Reports',
                 icon: 'solar:chart-square-linear',
                 id: uniqueId(),
-                url: '/app/payroll/reports',
+                url: '/app/acc/reports',
             },
 
 

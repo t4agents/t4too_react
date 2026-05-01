@@ -795,7 +795,7 @@ return (
                                         return viewId ? (
                                             <Link
                                                 key={`${viewId}-${index}`}
-                                                to={`/app/payroll/history/${viewId}`}
+                                                to={`/app/acc/je/${viewId}`}
                                                 onClick={() => setQuery('')}
                                                 className="block"
                                             >

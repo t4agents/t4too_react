@@ -626,7 +626,7 @@ const PayrollHistoryDetail = () => {
                                 <div className="flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-2">
                                         <Button asChild size="icon" variant="outline" aria-label="Back to History">
-                                            <Link to="/app/payroll/history">
+                                            <Link to="/app/acc/je">
                                                 <CornerUpLeft className="h-4 w-4" />
                                             </Link>
                                         </Button>

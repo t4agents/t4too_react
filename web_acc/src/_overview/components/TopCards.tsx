@@ -23,7 +23,7 @@ const TopCards = () => {
             img: iconBriefcase,
             bgcolor: "bg-warning/10 dark:bg-warning/10",
             textclr: "text-warning dark:text-warning",
-            url: "/app/payroll/entry"
+            url: "/app/acc/inbox"
 
         },
         // {
