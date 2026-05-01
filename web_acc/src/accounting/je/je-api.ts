@@ -33,6 +33,17 @@ export type JournalEntryRow = {
     [key: string]: unknown;
 };
 
+export type LedgerRow = {
+    id?: string;
+    entry_date?: string | null;
+    code?: string | null;
+    name?: string | null;
+    line_type?: string | null;
+    amount?: number | string | null;
+    running_balance?: number | string | null;
+    [key: string]: unknown;
+};
+
 type ApplyCoaResponse = {
     created: number;
     existing: number;
@@ -68,6 +79,15 @@ export const jeAPI = {
     async listEntries(): Promise<JournalEntryRow[]> {
         const response = await apiFetch('/acc/journal-entries?limit=200');
         return parseApiResponse<JournalEntryRow[]>(response, 'Failed to fetch journal entries');
+    },
+
+    async listLedger(): Promise<LedgerRow[]> {
+        const response = await apiFetch('/acc/ledger/general');
+        const data = await parseApiResponse<{ rows?: LedgerRow[] } | LedgerRow[]>(
+            response,
+            'Failed to fetch general ledger',
+        );
+        return Array.isArray(data) ? data : (data.rows ?? []);
     },
 
     async generateEntry(transactionId: string): Promise<JournalEntryRow> {
