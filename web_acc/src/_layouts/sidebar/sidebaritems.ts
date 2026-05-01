@@ -53,38 +53,32 @@ const SidebarContent: MenuItem[] = [
         children: [
             {
                 name: 'Inbox',
-                icon: 'solar:play-circle-linear',
+                icon: 'solar:ufo-linear',
                 id: uniqueId(),
                 url: '/app/payroll/entry',
             },
 
             {
                 name: 'Entries',
-                icon: 'solar:history-linear',
+                icon: 'solar:inbox-linear', 
                 id: uniqueId(),
                 url: '/app/payroll/history',
             },
 
             {
                 name: 'Ledger',
-                icon: 'solar:calendar-linear',
+                icon: 'solar:layers-linear',
                 id: uniqueId(),
                 url: '/app/payroll/ledger',
             },
 
             {
                 name: 'Reports',
-                icon: 'solar:calendar-linear',
+                icon: 'solar:chart-square-linear',
                 id: uniqueId(),
-                url: '/app/payroll/schedule',
+                url: '/app/payroll/reports',
             },
 
-            {
-                name: 'Close Period',
-                icon: 'solar:calendar-linear',
-                id: uniqueId(),
-                url: '/app/payroll/schedule',
-            },
 
         ],
     },
