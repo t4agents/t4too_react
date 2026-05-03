@@ -57,6 +57,7 @@ const CreateTickets = Loadable(lazy(() => import('src/_support/ticket/CreateTick
 const KB = Loadable(lazy(() => import('src/_support/kb/KB')));
 const BlogDetail = Loadable(lazy(() => import('src/_support/kb/BlogDetail')));
 const Integration = Loadable(lazy(() => import('src/_support/integration/Integration')));
+const MCP = Loadable(lazy(() => import('src/_support/mcp/MCP')));
 const SolarIcon = Loadable(lazy(() => import('src/_layouts/shared/icons/SolarIcon')));
 
 /* =========================Router Config========================= */
@@ -95,6 +96,7 @@ const router = createBrowserRouter([
                     { path: 'apps/tickets/create', element: <CreateTickets /> },
                     { path: 'support/kb', element: <KB /> },
                     { path: 'support/integration', element: <Integration /> },
+                    { path: 'support/mcp', element: <MCP /> },
                     { path: 'apps/blog/detail/:id', element: <BlogDetail /> },
                     { path: 'user-profile', element: <UserProfile /> },
                     { path: 'clients', element: <Clients /> },

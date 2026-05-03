@@ -137,6 +137,13 @@ const SidebarContent: MenuItem[] = [
                 url: '/app/support/integration',
                 isPro: false,
             },
+            {
+                name: 'MCP',
+                id: uniqueId(),
+                icon: 'solar:code-square-linear',
+                url: '/app/support/mcp',
+                isPro: false,
+            },
         ],
     },
 ];
