@@ -28,8 +28,7 @@ export const mcpAPI = {
     },
 
     async diagnose(): Promise<MCPApiResult> {
-        const agentsApiBaseUrl = import.meta.env.VITE_AGENTS_API_URL;
-        const response = await fetch(`${agentsApiBaseUrl}/diagnose_mcp`);
+        const response = await fetch('https://tooagentsapi.fastapicloud.dev/diagnose_mcp');
         return parseApiResponse(response);
     },
 
