@@ -8,7 +8,7 @@
 export const config = {
     // API Configuration
     api: {
-        baseUrl: import.meta.env.VITE_API_URL
+        baseUrl: import.meta.env.VITE_CORE_API
         // baseUrl: 'https://t4app.fastapicloud.dev'
         // baseUrl: 'http://localhost:8008',
     },

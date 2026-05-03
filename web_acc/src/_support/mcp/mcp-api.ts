@@ -23,7 +23,7 @@ async function parseApiResponse(response: Response): Promise<MCPApiResult> {
 
 export const mcpAPI = {
     async health(): Promise<MCPApiResult> {
-        const response = await apiFetch('/mcp_callback/acc/health');
+        const response = await apiFetch('/too/mcp/health');
         return parseApiResponse(response);
     },
 
