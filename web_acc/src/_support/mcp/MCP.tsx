@@ -31,10 +31,6 @@ const MCP = () => {
         await callApi('Step 1: GET /health', () => mcpAPI.health());
     };
 
-    const onDiagnose = async (e: FormEvent) => {
-        e.preventDefault();
-        await callApi('Step 2: GET /diagnose_mcp', () => mcpAPI.diagnose());
-    };
 
     const onRunTool = async (e: FormEvent) => {
         e.preventDefault();
@@ -66,12 +62,6 @@ const MCP = () => {
                     </form>
                 </CardBox>
 
-                <CardBox className="p-5 border-ld">
-                    <h3 className="text-base font-semibold text-sidebar-foreground">Step 2: MCP Diagnostics</h3>
-                    <form onSubmit={onDiagnose} className="mt-4">
-                        <Button type="submit">GET /diagnose_mcp</Button>
-                    </form>
-                </CardBox>
 
                 <CardBox className="p-5 border-ld">
                     <h3 className="text-base font-semibold text-sidebar-foreground">Step 3: Direct MCP Tool Run</h3>
@@ -83,6 +73,7 @@ const MCP = () => {
                         </div>
                     </form>
                 </CardBox>
+
 
                 <CardBox className="p-5 border-ld">
                     <h3 className="text-base font-semibold text-sidebar-foreground">Step 4: Chat Flow</h3>

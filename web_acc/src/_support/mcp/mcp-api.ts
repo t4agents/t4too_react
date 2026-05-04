@@ -27,13 +27,9 @@ export const mcpAPI = {
         return parseApiResponse(response);
     },
 
-    async diagnose(): Promise<MCPApiResult> {
-        const response = await fetch('https://tooagentsapi.fastapicloud.dev/diagnose_mcp');
-        return parseApiResponse(response);
-    },
 
     async runTool(tool: string, args: unknown): Promise<MCPApiResult> {
-        const response = await apiFetch('/mcp_callback/acc/run_tool', {
+        const response = await apiFetch('/too/mcp/core_run_tool', {
             method: 'POST',
             body: JSON.stringify({ tool, arguments: args }),
         });
@@ -41,7 +37,7 @@ export const mcpAPI = {
     },
 
     async chat(message: string): Promise<MCPApiResult> {
-        const response = await apiFetch('/mcp_callback/acc/chat', {
+        const response = await apiFetch('/too/mcp/core_chat', {
             method: 'POST',
             body: JSON.stringify({ message }),
         });
