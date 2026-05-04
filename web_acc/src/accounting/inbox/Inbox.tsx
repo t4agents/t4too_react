@@ -10,9 +10,6 @@ import { AccountRow, inboxAPI, TxRow } from 'src/accounting/inbox/inbox-api';
 
 const BCrumb = [{ to: '/', title: 'Home' }, { title: 'Inbox' }];
 
-const normalizeText = (value: string) =>
-    value.toLowerCase().replace(/\d+(?:\.\d+)?/g, '').replace(/\b(today|yesterday)\b/g, '').trim();
-
 const Inbox = () => {
     const uploadInputRef = useRef<HTMLInputElement | null>(null);
     const cameraInputRef = useRef<HTMLInputElement | null>(null);
@@ -83,15 +80,6 @@ const Inbox = () => {
     const parsedAmount = transactionNote.match(/(-?\d+(?:\.\d+)?)/)?.[1] || '-';
     const parsedDate = /\btoday\b/i.test(transactionNote) ? 'Today' : /\byesterday\b/i.test(transactionNote) ? 'Yesterday' : '-';
     const parsedDesc = transactionNote.replace(/-?\d+(?:\.\d+)?/g, '').replace(/\b(today|yesterday)\b/gi, '').trim() || '-';
-    const looksLikeUber = /\buber\b/i.test(transactionNote);
-    const looksLikeGrab = /\bgrab\b/i.test(transactionNote);
-    const looksLikeSalary = /\bsalary|payroll|income\b/i.test(transactionNote);
-    const aiCategory = looksLikeSalary ? 'Income' : looksLikeUber || looksLikeGrab ? 'Transportation Expense' : 'General Expense';
-    const aiAccount = looksLikeSalary ? 'Revenue / Payroll' : 'Operating Expense';
-    const aiConfidence = looksLikeSalary || looksLikeUber || looksLikeGrab ? 'High' : transactionNote.trim() ? 'Medium' : 'Low';
-    const similarTransactions = transactions
-        .filter((row) => normalizeText(row.description || '').includes(normalizeText(transactionNote)) && normalizeText(transactionNote).length > 2)
-        .slice(0, 3);
     const recentCaptures = transactions.slice(0, 5);
 
     const headBoxes = (
@@ -141,11 +129,7 @@ const Inbox = () => {
             <BreadcrumbComp title="AI Accounting" items={BCrumb} leftContent={null} rightContent={headBoxes} />
             <div className="flex gap-6 flex-col">
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    <Card className="shadow-none border-secondary/20">
-                        <CardHeader className="p-4">
-                            <CardTitle className="text-base">Chatbot</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-4 pt-0">
+                    <div>
                             <div className="rounded-md border border-secondary/20 bg-muted/20 p-3">
                                 <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3">
                                     <Icon icon="mdi:message-text-outline" className="h-4 w-4 text-muted-foreground" />
@@ -225,67 +209,25 @@ const Inbox = () => {
                             </div>
                             {msg ? <p className="mt-3 text-sm text-muted-foreground">{msg}</p> : null}
                             {error ? <p className="mt-3 text-sm text-red-600">Error: {error}</p> : null}
-                        </CardContent>
-                    </Card>
+                    </div>
 
-                    <Card className="shadow-none border-secondary/20">
-                        <CardHeader className="p-4">
-                            <CardTitle className="text-base">Review & Rules</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-4 pt-0">
-                            <div className="space-y-3">
-                                <div className="rounded-md border border-secondary/20 p-3">
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-sm font-medium">AI Suggestion</p>
-                                        <span className="rounded-full bg-lightprimary/40 px-2 py-0.5 text-xs">{aiConfidence}</span>
+                    <div>
+                            <div className="max-h-[320px] overflow-y-auto rounded-md border border-secondary/20 bg-muted/10 p-3">
+                                <p className="text-sm font-medium">Recent captures</p>
+                                {recentCaptures.length > 0 ? (
+                                    <div className="mt-2 space-y-2">
+                                        {recentCaptures.map((tx) => (
+                                            <div key={`recent-${tx.id}`} className="flex items-center justify-between text-xs">
+                                                <span className="truncate pr-2">{tx.description || '-'}</span>
+                                                <span className="text-muted-foreground">{tx.status || '-'}</span>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <p className="mt-2 text-xs text-muted-foreground">Category: <span className="text-foreground">{aiCategory}</span></p>
-                                    <p className="text-xs text-muted-foreground">Account: <span className="text-foreground">{aiAccount}</span></p>
-                                </div>
-
-                                <div className="rounded-md border border-secondary/20 p-3">
-                                    <p className="text-sm font-medium">Duplicate Check</p>
-                                    {similarTransactions.length > 0 ? (
-                                        <div className="mt-2 space-y-2">
-                                            {similarTransactions.map((tx) => (
-                                                <div key={tx.id} className="rounded-md bg-muted/30 px-2 py-1 text-xs">
-                                                    {tx.txn_date || '-'} | {tx.description || '-'} | {formatMoney(tx.amount ?? 0)}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="mt-2 text-xs text-muted-foreground">No close duplicate detected.</p>
-                                    )}
-                                </div>
-
-                                <div className="rounded-md border border-secondary/20 p-3">
-                                    <p className="text-sm font-medium">Smart Rules</p>
-                                    <p className="mt-2 text-xs text-muted-foreground">
-                                        Example: If description contains <span className="text-foreground">UBER</span>, map to <span className="text-foreground">Transportation Expense</span>.
-                                    </p>
-                                    <Button variant="outline" className="mt-2 h-8 rounded-full px-3 text-xs">
-                                        Create rule from this
-                                    </Button>
-                                </div>
-
-                                <div className="rounded-md border border-secondary/20 p-3">
-                                    <p className="text-sm font-medium">Recent Captures</p>
-                                    {recentCaptures.length > 0 ? (
-                                        <div className="mt-2 space-y-2">
-                                            {recentCaptures.map((tx) => (
-                                                <div key={`recent-${tx.id}`} className="flex items-center justify-between text-xs">
-                                                    <span className="truncate pr-2">{tx.description || '-'}</span>
-                                                    <span className="text-muted-foreground">{tx.status || '-'}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="mt-2 text-xs text-muted-foreground">No recent captures yet.</p>
-                                    )}
-                                </div>
+                                ) : (
+                                    <p className="mt-2 text-xs text-muted-foreground">No recent captures yet.</p>
+                                )}
                             </div>
-                        </CardContent>
-                    </Card>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
