@@ -128,7 +128,25 @@ const breadcrumbItems = [
     { title: 'Integration' },
 ];
 
+const formatDateInputValue = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+const getDefaultPaymentsCsvRange = () => {
+    const endDate = new Date();
+    const startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - 30);
+    return {
+        start: formatDateInputValue(startDate),
+        end: formatDateInputValue(endDate),
+    };
+};
+
 const Integration = () => {
+    const defaultPaymentsCsvRange = useMemo(() => getDefaultPaymentsCsvRange(), []);
     const [selected, setSelected] = useState<IntegrationOption | null>(null);
     const [refreshSkip, setRefreshSkip] = useState('0');
     const [refreshTop, setRefreshTop] = useState('100');
@@ -143,6 +161,12 @@ const Integration = () => {
     const [rangeStatus, setRangeStatus] = useState<string | null>(null);
     const [invoiceNumbers, setInvoiceNumbers] = useState<string[]>([]);
     const [rangeOpen, setRangeOpen] = useState(false);
+
+    const [paymentsCsvStart, setPaymentsCsvStart] = useState(defaultPaymentsCsvRange.start);
+    const [paymentsCsvEnd, setPaymentsCsvEnd] = useState(defaultPaymentsCsvRange.end);
+    const [paymentsCsvLoading, setPaymentsCsvLoading] = useState(false);
+    const [paymentsCsvStatus, setPaymentsCsvStatus] = useState<string | null>(null);
+    const [paymentsCsvOpen, setPaymentsCsvOpen] = useState(false);
 
     const handleRefreshInvoices = () => {
         const skipValue = refreshSkip.trim();
@@ -276,6 +300,110 @@ const Integration = () => {
         }
     };
 
+    const handleDownloadPaymentsCsv = async () => {
+        const startValue = paymentsCsvStart.trim();
+        const endValue = paymentsCsvEnd.trim();
+
+        if (!startValue || !endValue) {
+            notifyToast({
+                message: 'Please enter both a start date and end date to download the CSV.',
+                variant: 'error',
+            });
+            return;
+        }
+
+        const startDate = new Date(`${startValue}T00:00:00`);
+        const endDate = new Date(`${endValue}T00:00:00`);
+
+        if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+            notifyToast({
+                message: 'Please enter valid start and end dates.',
+                variant: 'error',
+            });
+            return;
+        }
+
+        if (endDate < startDate) {
+            notifyToast({
+                message: 'End date must be after the start date.',
+                variant: 'error',
+            });
+            return;
+        }
+
+        const dayRange = Math.floor((endDate.getTime() - startDate.getTime()) / 86_400_000);
+        if (dayRange >= 31) {
+            notifyToast({
+                message: 'Please choose a date range less than 31 days.',
+                variant: 'error',
+            });
+            return;
+        }
+
+        setPaymentsCsvLoading(true);
+        setPaymentsCsvStatus(null);
+
+        try {
+            const params = new URLSearchParams({
+                start_date: startValue,
+                end_date: endValue,
+            });
+            const paymentsCsvUrl = `https://growthzone.fastapicloud.dev/invoice_payments_csv?${params.toString()}`;
+            console.log('GrowthZone invoice payments CSV URL:', paymentsCsvUrl);
+            const response = await fetch(
+                paymentsCsvUrl,
+                {
+                    headers: {
+                        accept: 'text/csv,application/json',
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                const contentType = response.headers.get('content-type') ?? '';
+                const errorDetail = contentType.includes('application/json')
+                    ? JSON.stringify(await response.json().catch(() => null))
+                    : await response.text().catch(() => '');
+                const normalizedDetail = errorDetail.trim();
+                const message = normalizedDetail
+                    ? `Download failed with status ${response.status}: ${normalizedDetail}`
+                    : `Download failed with status ${response.status}`;
+                throw new Error(message);
+            }
+
+            const blob = await response.blob();
+            const downloadUrl = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `growthzone-invoice-payments-${startValue}-to-${endValue}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(downloadUrl);
+
+            const message = 'Invoice payments CSV download started.';
+            setPaymentsCsvStatus(message);
+            setPaymentsCsvOpen(false);
+            notifyToast({
+                message,
+                variant: 'success',
+            });
+        } catch (error) {
+            console.error(error);
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : 'CSV download failed with an unknown error.';
+            setPaymentsCsvStatus(message);
+            notifyToast({
+                message,
+                variant: 'error',
+            });
+        } finally {
+            setPaymentsCsvLoading(false);
+        }
+    };
+
     const supportMessage = useMemo(() => {
         if (!selected) {
             return 'Select an integration to view the recommended onboarding and support approach.';
@@ -340,7 +468,7 @@ const Integration = () => {
                             )}
 
                             {isGrowthZone && (
-                                <div className="mt-5 flex items-center justify-end gap-2">
+                                <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
                                     {/* <Button
                                         size="sm"
                                         className="whitespace-nowrap"
@@ -361,6 +489,17 @@ const Integration = () => {
                                         }}
                                     >
                                         My Invoices
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="whitespace-nowrap"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            setPaymentsCsvOpen(true);
+                                        }}
+                                    >
+                                        Payments CSV
                                     </Button>
                                 </div>
                             )}
@@ -478,6 +617,48 @@ const Integration = () => {
                             disabled={rangeLoading}
                         >
                             {rangeLoading ? 'Loading...' : 'Fetch Invoices'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={paymentsCsvOpen} onOpenChange={setPaymentsCsvOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>GrowthZone Invoice Payments CSV</DialogTitle>
+                        <DialogDescription>
+                            Choose a payment date range under 31 days to download the CSV.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid grid-cols-1 gap-4">
+                        <Input
+                            type="date"
+                            value={paymentsCsvStart}
+                            onChange={(event) => setPaymentsCsvStart(event.target.value)}
+                            aria-label="Start date"
+                        />
+                        <Input
+                            type="date"
+                            value={paymentsCsvEnd}
+                            onChange={(event) => setPaymentsCsvEnd(event.target.value)}
+                            aria-label="End date"
+                        />
+                        {paymentsCsvStatus && (
+                            <p className="text-xs text-muted-foreground">{paymentsCsvStatus}</p>
+                        )}
+                    </div>
+                    <DialogFooter className="gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => setPaymentsCsvOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleDownloadPaymentsCsv}
+                            disabled={paymentsCsvLoading}
+                        >
+                            {paymentsCsvLoading ? 'Downloading...' : 'Download CSV'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
