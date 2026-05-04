@@ -81,6 +81,85 @@ const Inbox = () => {
     const parsedDate = /\btoday\b/i.test(transactionNote) ? 'Today' : /\byesterday\b/i.test(transactionNote) ? 'Yesterday' : '-';
     const parsedDesc = transactionNote.replace(/-?\d+(?:\.\d+)?/g, '').replace(/\b(today|yesterday)\b/gi, '').trim() || '-';
     const recentCaptures = transactions.slice(0, 5);
+    const composerHeader = (
+        <div className="w-[420px] rounded-md border border-secondary/20 bg-muted/20 p-3">
+            <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3">
+                <Icon icon="mdi:message-text-outline" className="h-4 w-4 text-muted-foreground" />
+                <input
+                    className="h-10 w-full bg-transparent text-sm outline-none"
+                    value={transactionNote}
+                    onChange={(e) => setTransactionNote(e.target.value)}
+                    placeholder='Type transaction (e.g. "Uber 23 yesterday")'
+                />
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+                {composerTokens.map((token) => (
+                    <button
+                        key={token}
+                        type="button"
+                        className="rounded-full border border-secondary/30 bg-background px-3 py-1 text-xs text-muted-foreground hover:bg-muted/60"
+                        onClick={() => setTransactionNote((prev) => `${prev ? `${prev} ` : ''}${token}`)}
+                    >
+                        + {token}
+                    </button>
+                ))}
+            </div>
+            <div className="mt-3 rounded-md border border-dashed border-secondary/30 bg-background px-3 py-2 text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">Preview:</span>{' '}
+                Date: {parsedDate} | Desc: {parsedDesc} | Amount: {parsedAmount}
+            </div>
+            <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <Button
+                    className="h-9 px-5 rounded-full shadow-sm"
+                    onClick={addTypedTransaction}
+                    disabled={!transactionNote.trim()}
+                >
+                    <Icon icon="mdi:plus-circle-outline" className="h-4 w-4" />
+                    Add to Inbox
+                </Button>
+
+                <div className="flex flex-wrap items-center gap-2">
+                    <input
+                        ref={uploadInputRef}
+                        type="file"
+                        accept=".csv"
+                        className="hidden"
+                        onChange={(e) => {
+                            uploadCsv(e.target.files?.[0] || undefined);
+                            e.target.value = '';
+                        }}
+                    />
+                    <input
+                        ref={cameraInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={(e) => handleCameraFile(e.target.files?.[0])}
+                    />
+                    <Button
+                        variant="outline"
+                        className="h-9 px-4 rounded-full"
+                        onClick={() => uploadInputRef.current?.click()}
+                        disabled={loading}
+                    >
+                        {loading ? <LoadingSpinner size="sm" variant="dots" /> : <Icon icon="material-symbols:upload-rounded" className="h-4 w-4" />}
+                        Upload
+                    </Button>
+                    <Button
+                        variant="outline"
+                        className="h-9 px-4 rounded-full"
+                        onClick={() => cameraInputRef.current?.click()}
+                    >
+                        <Icon icon="mdi:camera-outline" className="h-4 w-4" />
+                        Camera
+                    </Button>
+                </div>
+            </div>
+            {msg ? <p className="mt-3 text-sm text-muted-foreground">{msg}</p> : null}
+            {error ? <p className="mt-3 text-sm text-red-600">Error: {error}</p> : null}
+        </div>
+    );
 
     const headBoxes = (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
@@ -126,89 +205,89 @@ const Inbox = () => {
 
     return (
         <>
-            <BreadcrumbComp title="AI Accounting" items={BCrumb} leftContent={null} rightContent={headBoxes} />
+            <BreadcrumbComp title="AI Accounting" items={BCrumb} leftContent={composerHeader} rightContent={headBoxes} />
             <div className="flex gap-6 flex-col">
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     <div>
-                            <div className="rounded-md border border-secondary/20 bg-muted/20 p-3">
-                                <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3">
-                                    <Icon icon="mdi:message-text-outline" className="h-4 w-4 text-muted-foreground" />
-                                    <input
-                                        className="h-10 w-full bg-transparent text-sm outline-none"
-                                        value={transactionNote}
-                                        onChange={(e) => setTransactionNote(e.target.value)}
-                                        placeholder='Type transaction (e.g. "Uber 23 yesterday")'
-                                    />
-                                </div>
-                                <div className="mt-2 flex flex-wrap gap-2">
-                                    {composerTokens.map((token) => (
-                                        <button
-                                            key={token}
-                                            type="button"
-                                            className="rounded-full border border-secondary/30 bg-background px-3 py-1 text-xs text-muted-foreground hover:bg-muted/60"
-                                            onClick={() => setTransactionNote((prev) => `${prev ? `${prev} ` : ''}${token}`)}
-                                        >
-                                            + {token}
-                                        </button>
-                                    ))}
-                                </div>
+                        <div className="rounded-md border border-secondary/20 bg-muted/20 p-3">
+                            <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3">
+                                <Icon icon="mdi:message-text-outline" className="h-4 w-4 text-muted-foreground" />
+                                <input
+                                    className="h-10 w-full bg-transparent text-sm outline-none"
+                                    value={transactionNote}
+                                    onChange={(e) => setTransactionNote(e.target.value)}
+                                    placeholder='Type transaction (e.g. "Uber 23 yesterday")'
+                                />
                             </div>
-
-                            <div className="mt-3 rounded-md border border-dashed border-secondary/30 bg-background px-3 py-2 text-xs text-muted-foreground">
-                                <span className="font-medium text-foreground">Preview:</span>{' '}
-                                Date: {parsedDate} | Desc: {parsedDesc} | Amount: {parsedAmount}
+                            <div className="mt-2 flex flex-wrap gap-2">
+                                {composerTokens.map((token) => (
+                                    <button
+                                        key={token}
+                                        type="button"
+                                        className="rounded-full border border-secondary/30 bg-background px-3 py-1 text-xs text-muted-foreground hover:bg-muted/60"
+                                        onClick={() => setTransactionNote((prev) => `${prev ? `${prev} ` : ''}${token}`)}
+                                    >
+                                        + {token}
+                                    </button>
+                                ))}
                             </div>
+                        </div>
 
-                            <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="mt-3 rounded-md border border-dashed border-secondary/30 bg-background px-3 py-2 text-xs text-muted-foreground">
+                            <span className="font-medium text-foreground">Preview:</span>{' '}
+                            Date: {parsedDate} | Desc: {parsedDesc} | Amount: {parsedAmount}
+                        </div>
+
+                        <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                            <Button
+                                className="h-9 px-5 rounded-full shadow-sm"
+                                onClick={addTypedTransaction}
+                                disabled={!transactionNote.trim()}
+                            >
+                                <Icon icon="mdi:plus-circle-outline" className="h-4 w-4" />
+                                Add to Inbox
+                            </Button>
+
+                            <div className="flex flex-wrap items-center gap-2">
+                                <input
+                                    ref={uploadInputRef}
+                                    type="file"
+                                    accept=".csv"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                        uploadCsv(e.target.files?.[0] || undefined);
+                                        e.target.value = '';
+                                    }}
+                                />
+                                <input
+                                    ref={cameraInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    capture="environment"
+                                    className="hidden"
+                                    onChange={(e) => handleCameraFile(e.target.files?.[0])}
+                                />
                                 <Button
-                                    className="h-9 px-5 rounded-full shadow-sm"
-                                    onClick={addTypedTransaction}
-                                    disabled={!transactionNote.trim()}
+                                    variant="outline"
+                                    className="h-9 px-4 rounded-full"
+                                    onClick={() => uploadInputRef.current?.click()}
+                                    disabled={loading}
                                 >
-                                    <Icon icon="mdi:plus-circle-outline" className="h-4 w-4" />
-                                    Add to Inbox
+                                    {loading ? <LoadingSpinner size="sm" variant="dots" /> : <Icon icon="material-symbols:upload-rounded" className="h-4 w-4" />}
+                                    Upload
                                 </Button>
-
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <input
-                                        ref={uploadInputRef}
-                                        type="file"
-                                        accept=".csv"
-                                        className="hidden"
-                                        onChange={(e) => {
-                                            uploadCsv(e.target.files?.[0] || undefined);
-                                            e.target.value = '';
-                                        }}
-                                    />
-                                    <input
-                                        ref={cameraInputRef}
-                                        type="file"
-                                        accept="image/*"
-                                        capture="environment"
-                                        className="hidden"
-                                        onChange={(e) => handleCameraFile(e.target.files?.[0])}
-                                    />
-                                    <Button
-                                        variant="outline"
-                                        className="h-9 px-4 rounded-full"
-                                        onClick={() => uploadInputRef.current?.click()}
-                                        disabled={loading}
-                                    >
-                                        {loading ? <LoadingSpinner size="sm" variant="dots" /> : <Icon icon="material-symbols:upload-rounded" className="h-4 w-4" />}
-                                        Upload
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        className="h-9 px-4 rounded-full"
-                                        onClick={() => cameraInputRef.current?.click()}
-                                    >
-                                        <Icon icon="mdi:camera-outline" className="h-4 w-4" />
-                                        Camera
-                                    </Button>
-                                </div>
+                                <Button
+                                    variant="outline"
+                                    className="h-9 px-4 rounded-full"
+                                    onClick={() => cameraInputRef.current?.click()}
+                                >
+                                    <Icon icon="mdi:camera-outline" className="h-4 w-4" />
+                                    Camera
+                                </Button>
                             </div>
-                            {msg ? <p className="mt-3 text-sm text-muted-foreground">{msg}</p> : null}
-                            {error ? <p className="mt-3 text-sm text-red-600">Error: {error}</p> : null}
+                        </div>
+                        {msg ? <p className="mt-3 text-sm text-muted-foreground">{msg}</p> : null}
+                        {error ? <p className="mt-3 text-sm text-red-600">Error: {error}</p> : null}
                     </div>
 
                     <div>
