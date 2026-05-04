@@ -36,7 +36,7 @@ async function parseApiResponse<T>(response: Response, message: string): Promise
 
 export const inboxAPI = {
     async listTransactions(): Promise<TxRow[]> {
-        const response = await apiFetch('/acc/transactions?limit=200');
+        const response = await apiFetch('/acc/get_transactions?limit=200');
         return parseApiResponse<TxRow[]>(response, 'Failed to fetch transactions');
     },
 
