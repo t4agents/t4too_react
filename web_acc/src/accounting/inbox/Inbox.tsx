@@ -8,7 +8,7 @@ import { Icon } from '@iconify/react/dist/iconify.js';
 import { formatMoney } from 'src/core/format';
 import { AccountRow, inboxAPI, TxRow } from 'src/accounting/inbox/inbox-api';
 
-const BCrumb = [{ to: '/', title: 'Home' }, { title: 'Inbox' }];
+// const BCrumb = [{ to: '/', title: 'Home' }, { title: 'Inbox' }];
 
 const Inbox = () => {
     const uploadInputRef = useRef<HTMLInputElement | null>(null);
@@ -76,11 +76,10 @@ const Inbox = () => {
         // setMsg('Voice capture selected.');
     };
 
-    const composerTokens = ['Expense', 'Income', 'Today', 'Cash', 'Bank'];
+    // const composerTokens = ['Expense', 'Income', 'Today', 'Cash', 'Bank'];
     const parsedAmount = transactionNote.match(/(-?\d+(?:\.\d+)?)/)?.[1] || '-';
     const parsedDate = /\btoday\b/i.test(transactionNote) ? 'Today' : /\byesterday\b/i.test(transactionNote) ? 'Yesterday' : '-';
     const parsedDesc = transactionNote.replace(/-?\d+(?:\.\d+)?/g, '').replace(/\b(today|yesterday)\b/gi, '').trim() || '-';
-    const recentCaptures = transactions.slice(0, 5);
     const composerHeader = (
         <div className="w-[420px] rounded-md border border-secondary/20 bg-muted/20 p-3">
             <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3">
@@ -92,7 +91,7 @@ const Inbox = () => {
                     placeholder='Type transaction (e.g. "Uber 23 yesterday")'
                 />
             </div>
-            <div className="mt-2 flex flex-wrap gap-2">
+            {/* <div className="mt-2 flex flex-wrap gap-2">
                 {composerTokens.map((token) => (
                     <button
                         key={token}
@@ -103,7 +102,7 @@ const Inbox = () => {
                         + {token}
                     </button>
                 ))}
-            </div>
+            </div> */}
             <div className="mt-3 rounded-md border border-dashed border-secondary/30 bg-background px-3 py-2 text-xs text-muted-foreground">
                 <span className="font-medium text-foreground">Preview:</span>{' '}
                 Date: {parsedDate} | Desc: {parsedDesc} | Amount: {parsedAmount}
@@ -205,7 +204,7 @@ const Inbox = () => {
 
     return (
         <>
-            <BreadcrumbComp title="AI Accounting" items={BCrumb} leftContent={composerHeader} rightContent={headBoxes} />
+            {/* <BreadcrumbComp title="AI Accounting" items={BCrumb} leftContent={composerHeader} rightContent={headBoxes} /> */}
             <div className="flex gap-6 flex-col">
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     <div>
@@ -219,7 +218,7 @@ const Inbox = () => {
                                     placeholder='Type transaction (e.g. "Uber 23 yesterday")'
                                 />
                             </div>
-                            <div className="mt-2 flex flex-wrap gap-2">
+                            {/* <div className="mt-2 flex flex-wrap gap-2">
                                 {composerTokens.map((token) => (
                                     <button
                                         key={token}
@@ -230,12 +229,7 @@ const Inbox = () => {
                                         + {token}
                                     </button>
                                 ))}
-                            </div>
-                        </div>
-
-                        <div className="mt-3 rounded-md border border-dashed border-secondary/30 bg-background px-3 py-2 text-xs text-muted-foreground">
-                            <span className="font-medium text-foreground">Preview:</span>{' '}
-                            Date: {parsedDate} | Desc: {parsedDesc} | Amount: {parsedAmount}
+                            </div> */}
                         </div>
 
                         <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -290,21 +284,10 @@ const Inbox = () => {
                         {error ? <p className="mt-3 text-sm text-red-600">Error: {error}</p> : null}
                     </div>
 
-                    <div>
-                            <div className="max-h-[320px] overflow-y-auto rounded-md border border-secondary/20 bg-muted/10 p-3">
-                                <p className="text-sm font-medium">Recent captures</p>
-                                {recentCaptures.length > 0 ? (
-                                    <div className="mt-2 space-y-2">
-                                        {recentCaptures.map((tx) => (
-                                            <div key={`recent-${tx.id}`} className="flex items-center justify-between text-xs">
-                                                <span className="truncate pr-2">{tx.description || '-'}</span>
-                                                <span className="text-muted-foreground">{tx.status || '-'}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="mt-2 text-xs text-muted-foreground">No recent captures yet.</p>
-                                )}
+                    <div className="h-full">
+                            <div className="h-full rounded-md border border-dashed border-secondary/30 bg-background px-3 py-2 text-xs text-muted-foreground">
+                                <span className="font-medium text-foreground">Preview:</span>{' '}
+                                Date: {parsedDate} | Desc: {parsedDesc} | Amount: {parsedAmount}
                             </div>
                     </div>
                 </div>
