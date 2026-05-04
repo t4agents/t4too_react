@@ -1,4 +1,3 @@
-import { RevenueUpdate } from "src/_overview/components/RevenueUpdate";
 import { YearlyBreakup } from "src/_overview/components/YearlyBreakup";
 import { MonthlyEarning } from "src/_overview/components/MonthlyEarning";
 import { RecentTransaction } from "src/_overview/components/RecentTransaction";
@@ -25,7 +24,7 @@ const Moderndash = () => {
                     </div>
                 </div>
                 <div className="lg:col-span-8 col-span-12 flex">
-                    <RevenueUpdate />
+                    {/* <RevenueUpdate /> */}
                 </div>
                 <div className="lg:col-span-4 col-span-12 ">
                     <YearlyBreakup />
