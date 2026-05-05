@@ -13,6 +13,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from 'src/components/ui/dialog';
+import { integrationAPI } from 'src/_support/integration/integration-api';
 
 type IntegrationOption = {
     key: string;
@@ -344,34 +345,10 @@ const Integration = () => {
         setPaymentsCsvStatus(null);
 
         try {
-            const params = new URLSearchParams({
-                start_date: startValue,
-                end_date: endValue,
+            const blob = await integrationAPI.downloadInvoicePaymentsCsv({
+                startDate: startValue,
+                endDate: endValue,
             });
-            const paymentsCsvUrl = `https://growthzone.fastapicloud.dev/invoice_payments_csv?${params.toString()}`;
-            console.log('GrowthZone invoice payments CSV URL:', paymentsCsvUrl);
-            const response = await fetch(
-                paymentsCsvUrl,
-                {
-                    headers: {
-                        accept: 'text/csv,application/json',
-                    },
-                }
-            );
-
-            if (!response.ok) {
-                const contentType = response.headers.get('content-type') ?? '';
-                const errorDetail = contentType.includes('application/json')
-                    ? JSON.stringify(await response.json().catch(() => null))
-                    : await response.text().catch(() => '');
-                const normalizedDetail = errorDetail.trim();
-                const message = normalizedDetail
-                    ? `Download failed with status ${response.status}: ${normalizedDetail}`
-                    : `Download failed with status ${response.status}`;
-                throw new Error(message);
-            }
-
-            const blob = await response.blob();
             const downloadUrl = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = downloadUrl;
@@ -668,3 +645,4 @@ const Integration = () => {
 };
 
 export default Integration;
+
