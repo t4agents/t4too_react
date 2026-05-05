@@ -117,6 +117,7 @@ const MarketingHome = () => {
             }
             await runNewUserProvisioning();
             navigate('/app');
+            
         } catch (error: unknown) {
             const rawMessage =
                 typeof error === 'object' && error !== null && 'message' in error
