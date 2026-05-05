@@ -4,6 +4,7 @@ import { notifyToast } from 'src/core/toast';
 import { waitForAuthReady } from 'src/store/auth-store';
 
 const API_BASE_URL = config.api.baseUrl;
+const API_GZ_URL = config.api.baseGZUrl;
 
 const decodeJwtPayload = (token: string): Record<string, unknown> | null => {
     try {
@@ -53,7 +54,8 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
     }
 
     const prefix = path.startsWith('/') ? '' : '/';
-    const res = await fetch(`${API_BASE_URL}${prefix}${path}`, {
+    const baseUrl = isInvoicePaymentsCsv ? API_GZ_URL : API_BASE_URL;
+    const res = await fetch(`${baseUrl}${prefix}${path}`, {
         ...options,
         headers,
     });
