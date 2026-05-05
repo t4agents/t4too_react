@@ -1,4 +1,4 @@
-import { apiFetch } from 'src/core/apihttp';
+import { apiFetchGZ } from 'src/core/apihttp';
 
 interface InvoicePaymentsCsvParams {
     startDate: string;
@@ -50,7 +50,7 @@ export const integrationAPI = {
             end_date: params.endDate,
         });
 
-        const response = await apiFetch(`/invoice_payments_csv?${queryParams.toString()}`, {
+        const response = await apiFetchGZ(`/invoice_payments_csv?${queryParams.toString()}`, {
             method: 'GET',
             headers: {
                 Accept: 'text/csv,application/json',
