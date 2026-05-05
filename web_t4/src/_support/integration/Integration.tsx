@@ -15,6 +15,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from 'src/components/ui/dialog';
+import { integrationAPI } from 'src/_support/integration/integration-api';
 
 type IntegrationOption = {
     key: string;
@@ -352,29 +353,14 @@ const Integration = () => {
             });
             const paymentsCsvUrl = `https://growthzone.fastapicloud.dev/invoice_payments_csv?${params.toString()}`;
             console.log('GrowthZone invoice payments CSV URL:', paymentsCsvUrl);
-
-            await waitForAuthReady();
-            const token = await getAccessToken();
-            console.log('GrowthZone invoice payments CSV auth:', {
-                hasToken: Boolean(token),
-            });
-
             const response = await fetch(
                 paymentsCsvUrl,
                 {
                     headers: {
                         accept: 'text/csv,application/json',
-                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
                     },
                 }
             );
-            console.log('GrowthZone invoice payments CSV response:', {
-                ok: response.ok,
-                status: response.status,
-                statusText: response.statusText,
-                url: response.url,
-                contentType: response.headers.get('content-type'),
-            });
 
             if (!response.ok) {
                 const contentType = response.headers.get('content-type') ?? '';
@@ -690,3 +676,4 @@ const Integration = () => {
 };
 
 export default Integration;
+
