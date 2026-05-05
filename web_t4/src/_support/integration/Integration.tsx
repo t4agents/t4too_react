@@ -503,6 +503,7 @@ const Integration = () => {
                             Provide the paging values to refresh open invoices.
                         </DialogDescription>
                     </DialogHeader>
+                    
                     <div className="grid grid-cols-1 gap-4">
                         <Input
                             type="number"
