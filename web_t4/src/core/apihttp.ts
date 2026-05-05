@@ -5,6 +5,19 @@ import { waitForAuthReady } from 'src/store/auth-store';
 
 const API_BASE_URL = config.api.baseUrl;
 
+const decodeJwtPayload = (token: string): Record<string, unknown> | null => {
+    try {
+        const payloadPart = token.split('.')[1];
+        if (!payloadPart) return null;
+        const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+        const decoded = atob(padded);
+        return JSON.parse(decoded) as Record<string, unknown>;
+    } catch {
+        return null;
+    }
+};
+
 export async function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
     let token: string | undefined;
 
@@ -24,12 +37,33 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
     }
 
     if (token) { headers.set('Authorization', `Bearer ${token}`); }
+    const isInvoicePaymentsCsv = path.includes('/invoice_payments_csv');
+    if (isInvoicePaymentsCsv) {
+        const jwtPayload = token ? decodeJwtPayload(token) : null;
+        console.log('[invoice_payments_csv][apiFetch][request]', {
+            path,
+            hasToken: Boolean(token),
+            hasAuthorizationHeader: headers.has('Authorization'),
+            authorizationScheme: headers.get('Authorization')?.split(' ')[0] ?? null,
+            jwtEmail:
+                (jwtPayload?.email as string | undefined) ??
+                (jwtPayload?.preferred_username as string | undefined) ??
+                null,
+        });
+    }
 
     const prefix = path.startsWith('/') ? '' : '/';
     const res = await fetch(`${API_BASE_URL}${prefix}${path}`, {
         ...options,
         headers,
     });
+    if (isInvoicePaymentsCsv) {
+        console.log('[invoice_payments_csv][apiFetch][response]', {
+            status: res.status,
+            ok: res.ok,
+            contentType: res.headers.get('content-type'),
+        });
+    }
 
     if ((res.status === 401 || res.status === 403) && typeof window !== 'undefined') {
         const currentPath = window.location.pathname;
