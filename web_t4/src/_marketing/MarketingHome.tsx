@@ -821,9 +821,9 @@ const MarketingHome = () => {
                         >
                             <p className="font-semibold" style={{ color: '#1c1c19', opacity: 0.8 }}>What you'll get</p>
                             <ul className="mt-2 space-y-2" style={{ color: '#564335' }}>
-                                <li>Automated payroll runs in minutes.</li>
-                                <li>Clean pay stubs and export-ready reports.</li>
-                                <li>Built-in tax reminders and alerts.</li>
+                                <li>Automated payroll runs in minutes...</li>
+                                <li>Clean pay stubs and export-ready reports...</li>
+                                <li>Built-in tax reminders and alerts...</li>
                             </ul>
                         </div>
                     </div>
