@@ -4,7 +4,9 @@ import BreadcrumbComp from 'src/_layouts/shared/breadcrumb/BreadcrumbComp';
 import CardBox from 'src/components/shared/CardBox';
 import { Button } from 'src/components/ui/button';
 import { Input } from 'src/components/ui/input';
+import { getAccessToken } from 'src/core/supabase';
 import { notifyToast } from 'src/core/toast';
+import { waitForAuthReady } from 'src/store/auth-store';
 import {
     Dialog,
     DialogContent,
@@ -350,14 +352,29 @@ const Integration = () => {
             });
             const paymentsCsvUrl = `https://growthzone.fastapicloud.dev/invoice_payments_csv?${params.toString()}`;
             console.log('GrowthZone invoice payments CSV URL:', paymentsCsvUrl);
+
+            await waitForAuthReady();
+            const token = await getAccessToken();
+            console.log('GrowthZone invoice payments CSV auth:', {
+                hasToken: Boolean(token),
+            });
+
             const response = await fetch(
                 paymentsCsvUrl,
                 {
                     headers: {
                         accept: 'text/csv,application/json',
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
                     },
                 }
             );
+            console.log('GrowthZone invoice payments CSV response:', {
+                ok: response.ok,
+                status: response.status,
+                statusText: response.statusText,
+                url: response.url,
+                contentType: response.headers.get('content-type'),
+            });
 
             if (!response.ok) {
                 const contentType = response.headers.get('content-type') ?? '';
@@ -373,13 +390,18 @@ const Integration = () => {
 
             const blob = await response.blob();
             const downloadUrl = URL.createObjectURL(blob);
+            console.log('GrowthZone invoice payments CSV blob:', {
+                size: blob.size,
+                type: blob.type,
+                downloadUrl,
+            });
             const link = document.createElement('a');
             link.href = downloadUrl;
             link.download = `growthzone-invoice-payments-${startValue}-to-${endValue}.csv`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            URL.revokeObjectURL(downloadUrl);
+            window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
 
             const message = 'Invoice payments CSV download started.';
             setPaymentsCsvStatus(message);
